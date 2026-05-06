@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Jogos Escolares</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://googleapis.com" rel="stylesheet">
+</head>
+<body class="login-page">
+    <div class="login-box">
+        <div class="login-accent-bar"></div>
+        <div class="login-header">
+            <div class="icon-circle">🏆</div>
+            <h2>Jogos Escolares</h2>
+            <p>Portal de Inscrições de Atletas</p>
+        </div>
+        <div class="login-form">
+            <div class="input-group">
+                <label>Nome do Aluno ou Usuário</label>
+                <input type="text" id="usuario" placeholder="Ex: João Silva ou prof">
+            </div>
+            <div class="input-group" id="group-senha" style="display: none;">
+                <label>Senha de Acesso</label>
+                <input type="password" id="senha" placeholder="Senha do professor">
+            </div>
+            <div class="input-group">
+                <label>Tipo de Acesso</label>
+                <select id="tipo" onchange="toggleSenha()">
+                    <option value="aluno">Aluno</option>
+                    <option value="professor">Professor</option>
+                </select>
+            </div>
+            <button onclick="login()" id="btnEntrar">Entrar no Sistema</button>
+        </div>
+    </div>
+    <script src="login.js"></script>
+</body>
+</html>

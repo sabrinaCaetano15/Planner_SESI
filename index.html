@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Jogos Escolares</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://googleapis.com" rel="stylesheet">
+</head>
+<body>
+    <header>⚽ Sistema de Jogos Escolares</header>
+    <div class="container">
+        <div class="header-actions">
+            <div class="user-info">Bem-vindo, <strong id="nomeExibicao">Usuário</strong></div>
+            <button onclick="logout()" class="btn-logout">Sair</button>
+        </div>
+
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <span class="stat-title">Inscritos</span>
+                <span class="stat-value" id="totalGeral">0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-title">Vagas Livres</span>
+                <span class="stat-value" id="vagasRestantes">48</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-title">Status</span>
+                <span class="stat-value" id="esporteLider">-</span>
+            </div>
+        </div>
+
+        <div class="cards">
+            <div class="card active">Vôlei</div>
+            <div class="card">Handebol</div>
+            <div class="card">Futsal</div>
+            <div class="card">Basquete</div>
+        </div>
+
+        <div class="sexo-toggle">
+            <div class="sexo-btn active">Masculino</div>
+            <div class="sexo-btn">Feminino</div>
+        </div>
+
+        <div class="form-box">
+            <input type="text" id="nomeAluno" placeholder="Nome do atleta">
+            <input type="text" id="turmaAluno" placeholder="Turma (ex: 1º B)">
+            <select id="posicaoAluno">
+                <option value="Titular">Titular</option>
+                <option value="Reserva">Reserva</option>
+            </select>
+            <button onclick="adicionarAluno()" id="btnSalvar">Salvar Atleta</button>
+        </div>
+
+        <div class="search-container">
+            <input type="text" id="busca" placeholder="Pesquisar por nome...">
+            <span id="contador" class="contador-badge">0/12 jogadores</span>
+        </div>
+
+        <div class="list">
+            <h3 id="tituloLista">Vôlei - Masculino</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Atleta</th>
+                        <th>Turma</th>
+                        <th>Posição</th>
+                        <th style="text-align: right;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-alunos"></tbody>
+            </table>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
