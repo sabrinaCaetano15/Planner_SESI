@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Eventos Disponíveis - Jogos Escolares</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        (function() {
+            if (localStorage.getItem("temaEscuro") === "ativo") {
+                document.documentElement.setAttribute("data-theme", "dark");
+            }
+        })();
+        document.addEventListener("DOMContentLoaded", () => {
+            const btn = document.getElementById("darkModeBtn");
+            if (btn) btn.innerText = document.documentElement.getAttribute("data-theme") === "dark" ? "☀️" : "🌙";
+        });
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const btn = document.getElementById("darkModeBtn");
+            if (html.getAttribute("data-theme") === "dark") {
+                html.removeAttribute("data-theme");
+                localStorage.setItem("temaEscuro", "inativo");
+                if (btn) btn.innerText = "🌙";
+            } else {
+                html.setAttribute("data-theme", "dark");
+                localStorage.setItem("temaEscuro", "ativo");
+                if (btn) btn.innerText = "☀️";
+            }
+        }
+    </script>
+</head>
+<body>
+    <header>
+        🏆 Torneios e Jogos Escolares
+        <button onclick="toggleDarkMode()" class="dark-mode-toggle" id="darkModeBtn">🌙</button>
+    </header>
+    <div class="container">
+        <div class="header-actions">
+            <div>Selecione o evento que deseja participar para iniciar sua inscrição.</div>
+        </div>
+        <div class="events-grid">
+            <!-- Evento 1 -->
+            <div class="event-card">
+                <div class="event-banner">⚽ Interclasse<span class="event-badge">Aberto</span></div>
+                <div class="event-body">
+                    <div class="event-title">Interclasse</div>
+                    <div class="event-info">📅 <strong>Período:</strong> 10 a 20 de Junho</div>
+                    <div class="event-info">📍 <strong>Local:</strong> Sesi CE255</div>
+                    
+                    <!-- Bloco do Placar adicionado usando estilos inline existentes -->
+                    <div class="event-info" style="margin: 12px 0; padding: 10px; background: var(--vermelho-light); border-radius: 12px; justify-content: center; width: 100%; border: 1px dashed var(--border-color);">
+                        🏆 <strong>Placar Geral:</strong> <span id="placar-Interclasse" style="font-weight: 800; margin-left: 5px; color: var(--vermelho);">0 x 0</span>
+                        <button onclick="editarPlacar('Interclasse')" class="btn-prof" style="display: none; margin-left: 10px; background: none; border: none; cursor: pointer; font-size: 1rem;">✏️</button>
+                    </div>
+
+                    <button onclick="selecionarEvento('Interclasse')" class="btn-inscrever">Participar Deste Torneio</button>
+                </div>
+            </div>
+            <!-- Evento 2 -->
+            <div class="event-card">
+                <div class="event-banner" style="background: #0284c7;">🏀 Intersesi<span class="event-badge">Aberto</span></div>
+                <div class="event-body">
+                    <div class="event-title">Intersesi</div>
+                    <div class="event-info">📅 <strong>Período:</strong> 15 a 18 de Setembro</div>
+                    <div class="event-info">📍 <strong>Local:</strong> Araras</div>
+                    
+                    <!-- Bloco do Placar adicionado usando estilos inline existentes -->
+                    <div class="event-info" style="margin: 12px 0; padding: 10px; background: var(--vermelho-light); border-radius: 12px; justify-content: center; width: 100%; border: 1px dashed var(--border-color);">
+                        🏆 <strong>Placar Geral:</strong> <span id="placar-Intersesi" style="font-weight: 800; margin-left: 5px; color: var(--vermelho);">0 x 0</span>
+                        <button onclick="editarPlacar('Intersesi')" class="btn-prof" style="display: none; margin-left: 10px; background: none; border: none; cursor: pointer; font-size: 1rem;">✏️</button>
+                    </div>
+
+                    <button onclick="selecionarEvento('Intersesi')" class="btn-inscrever" style="background: #0284c7;">Participar Deste Torneio</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function selecionarEvento(nomeEvento) {
+            localStorage.setItem("eventoSelecionado", nomeEvento);
+            window.location.href = localStorage.getItem("usuarioLogado") ? "index.html" : "login.html";
+        }
+
+        // Lógica para controle dos placares dinâmicos
+        document.addEventListener("DOMContentLoaded", () => {
+            const placaresPadrao = { "Interclasse": "0 x 0", "Intersesi": "0 x 0" };
+            const placares = JSON.parse(localStorage.getItem("placaresEventos")) || placaresPadrao;
+            
+            document.getElementById("placar-Interclasse").innerText = placares["Interclasse"] || "0 x 0";
+            document.getElementById("placar-Intersesi").innerText = placares["Intersesi"] || "0 x 0";
+
+            // Se o usuário logado for do tipo professor, mostra o botão para editar placar
+            const dadosUsuario = localStorage.getItem("usuarioLogado");
+            if (dadosUsuario) {
+                const user = JSON.parse(dadosUsuario);
+                if (user.tipo === "professor") {
+                    document.querySelectorAll(".btn-prof").forEach(btn => btn.style.display = "inline-block");
+                }
+            }
+        });
+
+        function editarPlacar(nomeEvento) {
+            const placaresPadrao = { "Interclasse": "0 x 0", "Intersesi": "0 x 0" };
+            const placares = JSON.parse(localStorage.getItem("placaresEventos")) || placaresPadrao;
+            
+            const novoPlacar = prompt(`Digite o novo placar para o evento ${nomeEvento}:`, placares[nomeEvento]);
+            
+            if (novoPlacar !== null && novoPlacar.trim() !== "") {
+                placares[nomeEvento] = novoPlacar.trim();
+                localStorage.setItem("placaresEventos", JSON.stringify(placares));
+                document.getElementById(`placar-${nomeEvento}`).innerText = novoPlacar.trim();
+            }
+        }
+    </script>
+</body>
+</html>

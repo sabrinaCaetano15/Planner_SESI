@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Jogos Escolares</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        (function() {
+            if (localStorage.getItem("temaEscuro") === "ativo") {
+                document.documentElement.setAttribute("data-theme", "dark");
+            }
+        })();
+        document.addEventListener("DOMContentLoaded", () => {
+            const btn = document.getElementById("darkModeBtn");
+            if (btn) btn.innerText = document.documentElement.getAttribute("data-theme") === "dark" ? "☀️" : "🌙";
+        });
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const btn = document.getElementById("darkModeBtn");
+            if (html.getAttribute("data-theme") === "dark") {
+                html.removeAttribute("data-theme");
+                localStorage.setItem("temaEscuro", "inativo");
+                if (btn) btn.innerText = "🌙";
+            } else {
+                html.setAttribute("data-theme", "dark");
+                localStorage.setItem("temaEscuro", "ativo");
+                if (btn) btn.innerText = "☀️";
+            }
+        }
+    </script>
+</head>
+<body class="login-page">
+    <button onclick="toggleDarkMode()" class="dark-mode-toggle" id="darkModeBtn" style="top:25px; transform:none;">🌙</button>
+    <div class="login-box">
+        <div class="login-accent-bar"></div>
+        <div class="login-header"><div class="icon-circle">🏆</div><h2>Acesso</h2></div>
+        <div class="login-form">
+            <div class="input-group">
+                <label>Tipo</label>
+                <select id="tipo" onchange="mudarInterface()">
+                    <option value="aluno">Aluno</option>
+                    <option value="professor">Professor</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label id="labelUser">CPF do Aluno</label>
+                <input type="text" id="usuario" placeholder="00000000000">
+            </div>
+            <div class="input-group"><label>Senha</label><input type="password" id="senha" placeholder="Digite sua senha"></div>
+            <button onclick="fazerLogin()" id="btnEntrar">Entrar</button>
+            <p id="linkCad" style="text-align:center; margin-top:20px;">Novo? <a href="cadastro.html" style="color:var(--vermelho); font-weight:bold; text-decoration:none;">Cadastre-se</a></p>
+            <p style="text-align:center; margin-top:10px;"><a href="eventos.html" style="color:var(--text-sub); text-decoration:none; font-size:0.9rem;">← Voltar para Eventos</a></p>
+        </div>
+    </div>
+    <script>
+        function mudarInterface() {
+            const t = document.getElementById("tipo").value;
+            const input = document.getElementById("usuario");
+            document.getElementById("labelUser").innerText = t === "professor" ? "Usuário Professor" : "CPF do Aluno";
+            input.placeholder = t === "professor" ? "Usuário" : "00000000000";
+            document.getElementById("linkCad").style.display = t === "professor" ? "none" : "block";
+        }
+        function fazerLogin() {
+            const u = document.getElementById("usuario").value.trim();
+            const s = document.getElementById("senha").value;
+            const t = document.getElementById("tipo").value;
+            if (t === "professor") {
+                if (u === "prof" && s === "123") {
+                    localStorage.setItem("usuarioLogado", JSON.stringify({ nome: "Prof. Marcos", tipo: "professor" }));
+                    window.location.href = "index.html";
+                } else alert("Erro!");
+            } else {
+                let users = JSON.parse(localStorage.getItem("usuariosAtletas")) || [];
+                const aluno = users.find(user => user.cpf === u.replace(/\D/g,'') && user.senha === s);
+                if (aluno) {
+                    localStorage.setItem("usuarioLogado", JSON.stringify({ nome: aluno.nome, tipo: "aluno", cpf: aluno.cpf }));
+                    window.location.href = "index.html";
+                } else alert("CPF ou Senha incorretos!");
+            }
+        }
+    </script>
+</body>
+</html>

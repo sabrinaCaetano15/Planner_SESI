@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        ⚽ Sistema de Jogos Escolares
+        <button onclick="toggleDarkMode()" class="dark-mode-toggle" id="darkModeBtn">🌙</button>
+    </header>
+    <div class="container">
+        <div style="background: var(--vermelho-light); color: var(--vermelho); padding: 12px 20px; border-radius: 16px; margin-bottom: 1.5rem; font-weight: 700; box-shadow: var(--shadow);">
+            📌 Inscrições para: <span id="nomeEventoAtual">Carregando...</span>
+        </div>
+        <div class="header-actions">
+            <div>Bem-vindo, <strong id="nomeExibicao">...</strong></div>
+            <div>
+                <button onclick="window.location.href='eventos.html'" class="btn-logout" style="margin-right:8px;">Trocar Evento</button>
+                <button onclick="logout()" class="btn-logout">Sair</button>
+            </div>
+        </div>
+        
+        <!-- Grid de Estatísticas com o Novo Contêiner de Placar -->
+        <div class="dashboard-stats">
+            <div class="stat-card"><span class="stat-title">Inscritos</span><span id="totalGeral" class="stat-value">0</span></div>
+            <div class="stat-card"><span class="stat-title">Vagas</span><span id="vagasRestantes" class="stat-value">48</span></div>
+            
+            <!-- CONTÊINER DO PLACAR ADICIONADO -->
+            <div class="stat-card" style="position: relative;">
+                <span class="stat-title">Placar do Evento</span>
+                <span id="placarDashboard" class="stat-value" style="color: var(--vermelho);">0 x 0</span>
+                <button onclick="editarPlacarDashboard()" id="btnEditarPlacarDash" style="display: none; position: absolute; top: 8px; right: 12px; background: none; border: none; cursor: pointer; font-size: 0.9rem;">✏️</button>
+            </div>
+        </div>
+
+        <div class="cards">
+            <div class="card active">Vôlei</div><div class="card">Handebol</div>
+            <div class="card">Futsal</div><div class="card">Basquete</div>
+        </div>
+        <div class="sexo-toggle">
+            <button class="sexo-btn active">Masculino</button>
+            <button class="sexo-btn">Feminino</button>
+        </div>
+        <div class="form-box" id="formProfessor">
+            <input type="text" id="nomeAluno" placeholder="Nome">
+            <input type="text" id="turmaAluno" placeholder="Turma">
+            <select id="posicaoAluno"><option>Titular</option><option>Reserva</option></select>
+            <button onclick="adicionarAluno()" id="btnSalvar">Salvar</button>
+        </div>
+        <button onclick="adicionarAluno()" id="btnInscricaoAluno" style="display:none; margin-bottom: 20px; background: var(--vermelho); color:white; border:none; padding: 15px; border-radius: 12px; width:100%; font-weight:bold; cursor:pointer;">Inscrever-me nesta modalidade</button>
+        <div class="search-container">
+            <input type="text" id="busca" oninput="renderTabela()" placeholder="🔍 Buscar atleta...">
+            <span id="contador" class="contador-badge">0/12 jogadores</span>
+        </div>
+        <div class="list">
+            <table>
+                <thead><tr><th>Atleta</th><th>Turma</th><th>Posição</th><th style="text-align:right">Ações</th></tr></thead>
+                <tbody id="tabela-alunos"></tbody>
+            </table>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
