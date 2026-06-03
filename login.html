@@ -13,6 +13,13 @@
         document.addEventListener("DOMContentLoaded", () => {
             const btn = document.getElementById("darkModeBtn");
             if (btn) btn.innerText = document.documentElement.getAttribute("data-theme") === "dark" ? "☀️" : "🌙";
+            
+            const inputs = document.querySelectorAll(".login-form input");
+            inputs.forEach(input => {
+                input.addEventListener("keypress", (e) => {
+                    if (e.key === "Enter") fazerLogin();
+                });
+            });
         });
         function toggleDarkMode() {
             const html = document.documentElement;
@@ -44,7 +51,7 @@
             </div>
             <div class="input-group">
                 <label id="labelUser">CPF do Aluno</label>
-                <input type="text" id="usuario" placeholder="00000000000">
+                <input type="text" id="usuario" placeholder="Apenas números" maxlength="11">
             </div>
             <div class="input-group"><label>Senha</label><input type="password" id="senha" placeholder="Digite sua senha"></div>
             <button onclick="fazerLogin()" id="btnEntrar">Entrar</button>
@@ -57,21 +64,31 @@
             const t = document.getElementById("tipo").value;
             const input = document.getElementById("usuario");
             document.getElementById("labelUser").innerText = t === "professor" ? "Usuário Professor" : "CPF do Aluno";
-            input.placeholder = t === "professor" ? "Usuário" : "00000000000";
+            input.placeholder = t === "professor" ? "Usuário de acesso" : "Apenas números";
+            input.maxLength = t === "professor" ? 50 : 11;
             document.getElementById("linkCad").style.display = t === "professor" ? "none" : "block";
+            input.value = "";
+            document.getElementById("senha").value = "";
         }
         function fazerLogin() {
             const u = document.getElementById("usuario").value.trim();
             const s = document.getElementById("senha").value;
             const t = document.getElementById("tipo").value;
+
+            if (!u || !s) {
+                alert("Por favor, preencha todos os campos!");
+                return;
+            }
+
             if (t === "professor") {
                 if (u === "prof" && s === "123") {
-                    localStorage.setItem("usuarioLogado", JSON.stringify({ nome: "Prof. Marcos", tipo: "professor" }));
+                    localStorage.setItem("usuarioLogado", JSON.stringify({ nome: "Prof. Marcos", tipo: "professor", cpf: "PROF" }));
                     window.location.href = "index.html";
-                } else alert("Erro!");
+                } else alert("Usuário ou senha do professor incorretos!");
             } else {
                 let users = JSON.parse(localStorage.getItem("usuariosAtletas")) || [];
-                const aluno = users.find(user => user.cpf === u.replace(/\D/g,'') && user.senha === s);
+                const limpoCPF = u.replace(/\D/g,'');
+                const aluno = users.find(user => user.cpf === limpoCPF && user.senha === s);
                 if (aluno) {
                     localStorage.setItem("usuarioLogado", JSON.stringify({ nome: aluno.nome, tipo: "aluno", cpf: aluno.cpf }));
                     window.location.href = "index.html";

@@ -22,16 +22,42 @@
             </div>
         </div>
         
-        <!-- Grid de Estatísticas com o Novo Contêiner de Placar -->
+        <!-- Grid de Estatísticas -->
         <div class="dashboard-stats">
             <div class="stat-card"><span class="stat-title">Inscritos</span><span id="totalGeral" class="stat-value">0</span></div>
-            <div class="stat-card"><span class="stat-title">Vagas</span><span id="vagasRestantes" class="stat-value">48</span></div>
+            <div class="stat-card"><span class="stat-title">Vagas Livres</span><span id="vagasRestantes" class="stat-value">94</span></div>
+        </div>
+
+        <!-- Painel Central: Placar Ao Vivo Interativo -->
+        <div class="list" style="text-align: center; padding: 2rem; margin-bottom: 1.5rem;">
+            <h3 style="color: var(--text-main); font-weight: 800; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                🏆 Placar Ao Vivo
+            </h3>
             
-            <!-- CONTÊINER DO PLACAR ADICIONADO -->
-            <div class="stat-card" style="position: relative;">
-                <span class="stat-title">Placar do Evento</span>
-                <span id="placarDashboard" class="stat-value" style="color: var(--vermelho);">0 x 0</span>
-                <button onclick="editarPlacarDashboard()" id="btnEditarPlacarDash" style="display: none; position: absolute; top: 8px; right: 12px; background: none; border: none; cursor: pointer; font-size: 0.9rem;">✏️</button>
+            <div style="display: flex; justify-content: center; align-items: center; gap: 3rem; margin-bottom: 1.5rem;">
+                <!-- Time A -->
+                <div>
+                    <div id="nomeTimeA" style="font-weight: 800; font-size: 1.2rem; color: var(--text-main); margin-bottom: 5px; cursor: pointer;" onclick="alterarNomeTime('A')">2º A</div>
+                    <span id="pontoTimeA" style="font-size: 4rem; font-weight: 900; color: var(--vermelho); line-height: 1;">0</span>
+                </div>
+                
+                <!-- Divisor X -->
+                <div style="font-size: 2rem; font-weight: 900; color: var(--text-sub);">X</div>
+                
+                <!-- Time B -->
+                <div>
+                    <div id="nomeTimeB" style="font-weight: 800; font-size: 1.2rem; color: var(--text-main); margin-bottom: 5px; cursor: pointer;" onclick="alterarNomeTime('B')">3º B</div>
+                    <span id="pontoTimeB" style="font-size: 4rem; font-weight: 900; color: var(--vermelho); line-height: 1;">0</span>
+                </div>
+            </div>
+
+            <!-- Controles do Placar (Liberados via script apenas para o Professor) -->
+            <div id="controlesPlacar" style="display: none; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <button onclick="modificarPlacar('A', 1)" style="background: var(--vermelho); color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 700; cursor: pointer;">+ Time A</button>
+                <button onclick="modificarPlacar('A', -1)" style="background: var(--vermelho); color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 700; cursor: pointer;">- Time A</button>
+                <button onclick="modificarPlacar('B', 1)" style="background: var(--vermelho); color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 700; cursor: pointer;">+ Time B</button>
+                <button onclick="modificarPlacar('B', -1)" style="background: var(--vermelho); color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 700; cursor: pointer;">- Time B</button>
+                <button onclick="resetarPlacar()" style="background: #1e293b; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 700; cursor: pointer;">🔄 Resetar</button>
             </div>
         </div>
 
