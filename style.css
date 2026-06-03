@@ -108,3 +108,87 @@ th:last-child, td:last-child { text-align: right; }
     .search-container input { text-align: center; }
     .contador-badge { text-align: center; }
 }
+/* =========================================================
+   GERENCIADOR DE EVENTOS
+========================================================= */
+
+.gerenciador-eventos{
+    background: var(--bg-card);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 25px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+}
+
+.gerenciador-header{
+    margin-bottom: 20px;
+}
+
+.gerenciador-header h3{
+    color: var(--vermelho);
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin-bottom: 5px;
+}
+
+.gerenciador-header span{
+    color: var(--text-sub);
+    font-size: 0.9rem;
+}
+
+.gerenciador-form{
+    display: grid;
+    grid-template-columns: 2fr 1.2fr 1.2fr 180px;
+    gap: 12px;
+    align-items: center;
+}
+
+.gerenciador-form input{
+    height: 48px;
+}
+
+.btn-criar-evento{
+    width: 100%;
+    height: 48px;
+    background: var(--vermelho);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-criar-evento:hover{
+    background: var(--vermelho-dark);
+    transform: translateY(-2px);
+}
+
+.btn-remover-evento{
+    width: 100%;
+    background: #dc2626;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-remover-evento:hover{
+    background: #991b1b;
+}
+
+@media (max-width: 768px){
+
+    .gerenciador-form{
+        grid-template-columns: 1fr;
+    }
+
+    .btn-criar-evento{
+        width: 100%;
+    }
+
+}
