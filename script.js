@@ -76,44 +76,22 @@ document.addEventListener("DOMContentLoaded", () => {
 ========================================================= */
 
 function carregarUsuario() {
+    const dadosSessao = localStorage.getItem("usuarioLogado");
 
-    let dadosUsuario = localStorage.getItem("usuarioLogado");
+    // Debug Técnico: Mostra no console exatamente o que veio do login assim que a página abre
+    console.log("DADOS DA SESSÃO CARREGADOS NO INDEX:", dadosSessao);
 
-    const tipo = localStorage.getItem("tipo");
-    const nome = localStorage.getItem("nomeAlunoLogado");
-
-    if (!dadosUsuario && tipo) {
-
-        const usuarioReconstruido = {
-            nome:
-                tipo === "professor"
-                    ? "Professor"
-                    : (nome || "Aluno"),
-
-            tipo: tipo,
-
-            cpf:
-                tipo === "professor"
-                    ? "PROF"
-                    : (nome || "ALUNO")
-        };
-
-        localStorage.setItem(
-            "usuarioLogado",
-            JSON.stringify(usuarioReconstruido)
-        );
-
-        dadosUsuario = JSON.stringify(usuarioReconstruido);
-    }
-
-    if (!dadosUsuario) {
-        alert("Faça login.");
+    if (!dadosSessao) {
+        console.warn("Nenhum usuário logado encontrado. Redirecionando para login.html...");
         window.location.href = "login.html";
         return;
     }
 
-    usuarioLogado = JSON.parse(dadosUsuario);
+    usuarioLogado = JSON.parse(dadosSessao);
 }
+
+
+
 
 /* =========================================================
    PERFIL
@@ -546,4 +524,27 @@ function logout() {
     localStorage.removeItem("nomeAlunoLogado");
 
     window.location.href = "login.html";
+}
+/* =========================================================
+   LOGOUT
+========================================================= */
+function logout() {
+    localStorage.clear(); // Limpa todos os dados salvos de login antigo
+    window.location.href = "login.html"; // Manda de volta de forma segura
+}
+
+function mudarInterface() {
+    const t = document.getElementById("tipo").value;
+    const input = document.getElementById("usuario");
+    
+    document.getElementById("labelUser").innerText = t === "professor" ? "Usuário Professor" : "CPF do Aluno";
+    input.placeholder = t === "professor" ? "Usuário de acesso" : "Apenas números";
+    input.maxLength = t === "professor" ? 50 : 11;
+    document.getElementById("linkCad").style.display = t === "professor" ? "none" : "block";
+    
+    // CORREÇÃO VISUAL: Deixe o campo de senha sempre visível para os dois tipos
+    document.getElementById("group-senha").style.display = "block"; 
+    
+    input.value = "";
+    document.getElementById("senha").value = "";
 }
