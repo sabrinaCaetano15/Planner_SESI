@@ -1,30 +1,42 @@
+/* =========================================================
+   TEMA
+========================================================= */
+
 (function aplicarTemaSalvo() {
-    const temaSalvo = localStorage.getItem("temaEscuro");
-    if (temaSalvo === "ativo") {
+    if (localStorage.getItem("temaEscuro") === "ativo") {
         document.documentElement.setAttribute("data-theme", "dark");
     }
 })();
 
 function toggleDarkMode() {
-    const htmlElement = document.documentElement;
+    const html = document.documentElement;
     const btn = document.getElementById("darkModeBtn");
-    if (htmlElement.getAttribute("data-theme") === "dark") {
-        htmlElement.removeAttribute("data-theme");
+
+    if (html.getAttribute("data-theme") === "dark") {
+        html.removeAttribute("data-theme");
         localStorage.setItem("temaEscuro", "inativo");
         if (btn) btn.innerText = "🌙";
     } else {
-        htmlElement.setAttribute("data-theme", "dark");
+        html.setAttribute("data-theme", "dark");
         localStorage.setItem("temaEscuro", "ativo");
         if (btn) btn.innerText = "☀️";
     }
 }
 
 function inicializarTemaBotao() {
-    const btnDark = document.getElementById("darkModeBtn");
-    if (btnDark) {
-        btnDark.innerText = document.documentElement.getAttribute("data-theme") === "dark" ? "☀️" : "🌙";
+    const btn = document.getElementById("darkModeBtn");
+
+    if (btn) {
+        btn.innerText =
+            document.documentElement.getAttribute("data-theme") === "dark"
+                ? "☀️"
+                : "🌙";
     }
 }
+
+/* =========================================================
+   VARIÁVEIS
+========================================================= */
 
 let usuarioLogado = null;
 let modalidadeAtiva = "Vôlei";
@@ -32,217 +44,506 @@ let sexoAtivo = "Masculino";
 let eventoAtual = "";
 let atletas = [];
 
+/* =========================================================
+   INICIALIZAÇÃO
+========================================================= */
+
 document.addEventListener("DOMContentLoaded", () => {
+
     inicializarTemaBotao();
+
     if (!document.getElementById("tabela-alunos")) return;
 
-    // --- CORREÇÃO DO RECONHECIMENTO DE LOGIN ---
-    // Verifica tanto o formato de Objeto Estruturado quanto os dados Simples do novo Login
-    let dadosUsuario = localStorage.getItem("usuarioLogado");
-    const tipoSimples = localStorage.getItem("tipo");
-    const nomeSimples = localStorage.getItem("nomeAlunoLogado");
+    carregarUsuario();
 
-    if (!dadosUsuario && tipoSimples) {
-        // Reconstrói o objeto esperado pelo sistema caso venha do novo login sem senha
-        const nomeFormatado = tipoSimples === "professor" ? "Prof. Marcos" : (nomeSimples || "Aluno");
-        const cpfFormatado = tipoSimples === "professor" ? "PROF" : "ALUNO_SEM_CPF";
-        
-        const backupSession = { nome: nomeFormatado, tipo: tipoSimples, cpf: cpfFormatado };
-        localStorage.setItem("usuarioLogado", JSON.stringify(backupSession));
-        dadosUsuario = JSON.stringify(backupSession);
+    eventoAtual =
+        localStorage.getItem("eventoSelecionado") || "Interclasse";
+
+    atletas =
+        JSON.parse(localStorage.getItem("atletasInscritos")) || [];
+
+    document.getElementById("nomeEventoAtual").innerText = eventoAtual;
+
+    configurarPerfil();
+    configurarFiltros();
+
+    atualizarDashboard();
+    atualizarPlacar();
+});
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+function carregarUsuario() {
+
+    let dadosUsuario = localStorage.getItem("usuarioLogado");
+
+    const tipo = localStorage.getItem("tipo");
+    const nome = localStorage.getItem("nomeAlunoLogado");
+
+    if (!dadosUsuario && tipo) {
+
+        const usuarioReconstruido = {
+            nome:
+                tipo === "professor"
+                    ? "Professor"
+                    : (nome || "Aluno"),
+
+            tipo: tipo,
+
+            cpf:
+                tipo === "professor"
+                    ? "PROF"
+                    : (nome || "ALUNO")
+        };
+
+        localStorage.setItem(
+            "usuarioLogado",
+            JSON.stringify(usuarioReconstruido)
+        );
+
+        dadosUsuario = JSON.stringify(usuarioReconstruido);
     }
 
-    eventoAtual = localStorage.getItem("eventoSelecionado") || "Interclasse";
-
     if (!dadosUsuario) {
-        alert("Acesso negado. Por favor, faça login.");
+        alert("Faça login.");
         window.location.href = "login.html";
         return;
     }
 
     usuarioLogado = JSON.parse(dadosUsuario);
-    atletas = JSON.parse(localStorage.getItem("atletasInscritos")) || [];
-    
-    const elemEvento = document.getElementById("nomeEventoAtual");
-    if (elemEvento) elemEvento.innerText = eventoAtual;
-    
-    configurarPerfilInterface();
-    configurarEventosFiltros();
-    atualizarDashboard();
-    atualizarPlacarInterface();
-});
-
-function configurarPerfilInterface() {
-    if (!usuarioLogado) return;
-    const elemExibicao = document.getElementById("nomeExibicao");
-    if (elemExibicao) elemExibicao.innerText = usuarioLogado.nome;
-    
-    const isProf = usuarioLogado.tipo === "professor";
-    
-    const formProf = document.getElementById("formProfessor");
-    if (formProf) formProf.style.display = isProf ? "grid" : "none";
-    
-    const btnInsc = document.getElementById("btnInscricaoAluno");
-    if (btnInsc) btnInsc.style.display = isProf ? "none" : "block";
-    
-    const painelControles = document.getElementById("controlesPlacar");
-    if (painelControles) {
-        painelControles.style.display = isProf ? "flex" : "none";
-    }
 }
 
-function configurarEventosFiltros() {
-    document.querySelectorAll(".cards .card").forEach(card => {
-        card.addEventListener("click", (e) => {
-            document.querySelectorAll(".cards .card").forEach(c => c.classList.remove("active"));
-            e.target.classList.add("active");
-            modalidadeAtiva = e.target.innerText;
+/* =========================================================
+   PERFIL
+========================================================= */
+
+function configurarPerfil() {
+
+    document.getElementById("nomeExibicao").innerText =
+        usuarioLogado.nome;
+
+    const professor = usuarioLogado.tipo === "professor";
+
+    document.getElementById("formProfessor").style.display =
+        professor ? "grid" : "none";
+
+    document.getElementById("btnInscricaoAluno").style.display =
+        professor ? "none" : "block";
+
+    document.getElementById("controlesPlacar").style.display =
+        professor ? "flex" : "none";
+}
+
+/* =========================================================
+   FILTROS
+========================================================= */
+
+function configurarFiltros() {
+
+    document.querySelectorAll(".card").forEach(card => {
+
+        card.addEventListener("click", () => {
+
+            document.querySelectorAll(".card")
+                .forEach(c => c.classList.remove("active"));
+
+            card.classList.add("active");
+
+            modalidadeAtiva = card.innerText;
+
             atualizarDashboard();
-            atualizarPlacarInterface();
+            atualizarPlacar();
         });
     });
 
-    document.querySelectorAll(".sexo-toggle .sexo-btn").forEach(btn => {
-        btn.addEventListener("click", (e) => {
-            document.querySelectorAll(".sexo-toggle .sexo-btn").forEach(b => b.classList.remove("active"));
-            e.target.classList.add("active");
-            sexoAtivo = e.target.innerText;
+    document.querySelectorAll(".sexo-btn").forEach(btn => {
+
+        btn.addEventListener("click", () => {
+
+            document.querySelectorAll(".sexo-btn")
+                .forEach(b => b.classList.remove("active"));
+
+            btn.classList.add("active");
+
+            sexoAtivo = btn.innerText;
+
             atualizarDashboard();
-            atualizarPlacarInterface();
+            atualizarPlacar();
         });
     });
 }
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
 
 function atualizarDashboard() {
-    renderTabela();
-    const totalCategoria = atletas.filter(a => a.evento === eventoAtual && a.modalidade === modalidadeAtiva && (a.sexo === sexoAtivo || a.genero === sexoAtivo)).length;
-    const elemContador = document.getElementById("contador");
-    if (elemContador) elemContador.innerText = `${totalCategoria}/12 jogadores`;
 
-    const totalInscritosGeral = atletas.filter(a => a.evento === eventoAtual).length;
-    const elemGeral = document.getElementById("totalGeral");
-    if (elemGeral) elemGeral.innerText = totalInscritosGeral;
-    const elemVagas = document.getElementById("vagasRestantes");
-    if (elemVagas) elemVagas.innerText = Math.max(0, 94 - totalInscritosGeral);
+    renderTabela();
+
+    const total = atletas.filter(a =>
+        a.evento === eventoAtual &&
+        a.modalidade === modalidadeAtiva &&
+        a.sexo === sexoAtivo
+    ).length;
+
+    document.getElementById("contador").innerText =
+        `${total}/12 jogadores`;
+
+    const totalGeral = atletas.filter(a =>
+        a.evento === eventoAtual
+    ).length;
+
+    document.getElementById("totalGeral").innerText =
+        totalGeral;
+
+    document.getElementById("vagasRestantes").innerText =
+        Math.max(0, 94 - totalGeral);
 }
 
+/* =========================================================
+   TABELA
+========================================================= */
+
 function renderTabela() {
+
     const tbody = document.getElementById("tabela-alunos");
-    if (!tbody) return;
-    const elemBusca = document.getElementById("busca");
-    const buscaTexto = elemBusca ? elemBusca.value.toLowerCase() : "";
+
     tbody.innerHTML = "";
 
-    const atletasFiltrados = atletas.filter(a => {
-        const escopoCorreto = a.evento === eventoAtual && a.modalidade === modalidadeAtiva && (a.sexo === sexoAtivo || a.genero === sexoAtivo);
-        const buscaCorreta = a.nome.toLowerCase().includes(buscaTexto) || a.turma.toLowerCase().includes(buscaTexto);
-        return escopoCorreto && buscaCorreta;
+    const busca =
+        document.getElementById("busca")
+        .value
+        .toLowerCase();
+
+    const filtrados = atletas.filter(a => {
+
+        return (
+            a.evento === eventoAtual &&
+            a.modalidade === modalidadeAtiva &&
+            a.sexo === sexoAtivo &&
+            (
+                a.nome.toLowerCase().includes(busca) ||
+                a.turma.toLowerCase().includes(busca)
+            )
+        );
     });
 
-    atletasFiltrados.forEach(atleta => {
+    filtrados.forEach(atleta => {
+
         const tr = document.createElement("tr");
-        const classeBadge = atleta.posicao.toLowerCase() === "titular" ? "titular" : "reserva";
-        
-        const donoInscricao = atleta.criadorInscricao || atleta.cpfCriador;
-        const podeDeletar = usuarioLogado && (usuarioLogado.tipo === "professor" || donoInscricao === usuarioLogado.cpf || donoInscricao === usuarioLogado.nome);
+
+        const professor =
+            usuarioLogado.tipo === "professor";
 
         tr.innerHTML = `
             <td><strong>${atleta.nome}</strong></td>
+
             <td>${atleta.turma}</td>
-            <td><span class="badge ${classeBadge}">${atleta.posicao}</span></td>
-            <td style="text-align:right">
-                ${podeDeletar ? `<button onclick="removerAtleta(${atleta.id})" class="action-btn" style="background:none; border:none; cursor:pointer; color:var(--vermelho)">🗑️</button>` : `<span style="color:var(--text-sub); font-size:0.8rem;">Bloqueado</span>`}
+
+            <td>
+                <span class="badge ${atleta.posicao.toLowerCase()}">
+                    ${atleta.posicao}
+                </span>
+            </td>
+
+            <td style="text-align:right;">
+
+                ${
+                    professor
+                    ?
+                    `
+                    <button onclick="editarAtleta(${atleta.id})"
+                    class="action-btn">✏️</button>
+
+                    <button onclick="removerAtleta(${atleta.id})"
+                    class="action-btn">🗑️</button>
+                    `
+                    :
+                    `<span style="color:gray;">Bloqueado</span>`
+                }
+
             </td>
         `;
+
         tbody.appendChild(tr);
     });
 }
 
+/* =========================================================
+   ADICIONAR
+========================================================= */
+
 function adicionarAluno() {
+
     if (!usuarioLogado) return;
-    let nome, turma, posicao, criadorInscricao;
+
+    let nome;
+    let turma;
+    let posicao;
 
     if (usuarioLogado.tipo === "professor") {
-        nome = document.getElementById("nomeAluno").value.trim();
-        turma = document.getElementById("turmaAluno").value.trim();
-        posicao = document.getElementById("posicaoAluno").value;
-        criadorInscricao = "PROFESSOR";
+
+        nome =
+            document.getElementById("nomeAluno").value.trim();
+
+        turma =
+            document.getElementById("turmaAluno").value.trim();
+
+        posicao =
+            document.getElementById("posicaoAluno").value;
+
         if (!nome || !turma) {
-            alert("Preencha todos os campos do aluno!");
+            alert("Preencha todos os campos.");
             return;
         }
+
     } else {
+
         nome = usuarioLogado.nome;
-        criadorInscricao = usuarioLogado.cpf || usuarioLogado.nome; 
+
+        turma = prompt("Digite sua turma:");
+
+        if (!turma) return;
+
         posicao = "Reserva";
-
-        const jaInscrito = atletas.some(a => a.evento === eventoAtual && (a.criadorInscricao === criadorInscricao || a.cpfCriador === criadorInscricao) && a.modalidade === modalidadeAtiva && (a.sexo === sexoAtivo || a.genero === sexoAtivo));
-        if (jaInscrito) return alert("Você já está inscrito nesta modalidade para este evento!");
-
-        const inputTurma = prompt("Digite a sua turma (Ex: 1º Ano A):");
-        if (!inputTurma || inputTurma.trim() === "") return alert("Inscrição cancelada. A turma é obrigatória!");
-        turma = inputTurma.trim();
     }
 
-    atletas.push({ 
-        id: Date.now(), 
-        nome, 
-        turma, 
-        posicao, 
-        modalidade: modalidadeAtiva, 
-        sexo: sexoAtivo, 
-        genero: sexoAtivo, 
-        criadorInscricao, 
-        cpfCriador: criadorInscricao, 
-        evento: eventoAtual 
+    atletas.push({
+        id: Date.now(),
+        nome,
+        turma,
+        posicao,
+        modalidade: modalidadeAtiva,
+        sexo: sexoAtivo,
+        evento: eventoAtual
     });
-    
-    localStorage.setItem("atletasInscritos", JSON.stringify(atletas));
-    
+
+    localStorage.setItem(
+        "atletasInscritos",
+        JSON.stringify(atletas)
+    );
+
+    atualizarDashboard();
+
     if (usuarioLogado.tipo === "professor") {
+
         document.getElementById("nomeAluno").value = "";
         document.getElementById("turmaAluno").value = "";
-    } else {
-        alert("Inscrição realizada com sucesso!");
     }
+}
+
+/* =========================================================
+   EDITAR
+========================================================= */
+
+function editarAtleta(id) {
+
+    if (usuarioLogado.tipo !== "professor") return;
+
+    const atleta = atletas.find(a => a.id === id);
+
+    if (!atleta) return;
+
+    const novoNome =
+        prompt("Editar nome:", atleta.nome);
+
+    if (!novoNome) return;
+
+    const novaTurma =
+        prompt("Editar turma:", atleta.turma);
+
+    if (!novaTurma) return;
+
+    atleta.nome = novoNome;
+    atleta.turma = novaTurma;
+
+    localStorage.setItem(
+        "atletasInscritos",
+        JSON.stringify(atletas)
+    );
 
     atualizarDashboard();
 }
 
+/* =========================================================
+   REMOVER
+========================================================= */
+
 function removerAtleta(id) {
-    if (confirm("Deseja realmente remover este atleta?")) {
-        atletas = atletas.filter(a => a.id !== id);
-        localStorage.setItem("atletasInscritos", JSON.stringify(atletas));
-        atualizarDashboard();
-    }
+
+    if (usuarioLogado.tipo !== "professor") return;
+
+    if (!confirm("Remover atleta?")) return;
+
+    atletas = atletas.filter(a => a.id !== id);
+
+    localStorage.setItem(
+        "atletasInscritos",
+        JSON.stringify(atletas)
+    );
+
+    atualizarDashboard();
 }
 
-/* ==========================================================================
-   SISTEMA DE GERENCIAMENTO DE PLACAR AO VIVO (CORRIGIDO)
-   ========================================================================== */
+/* =========================================================
+   PLACAR
+========================================================= */
+
 function obterBancoPlacares() {
-    return JSON.parse(localStorage.getItem("bancoPlacaresJogos")) || {};
+    return JSON.parse(
+        localStorage.getItem("bancoPlacaresJogos")
+    ) || {};
 }
 
-function obterChaveUnica() {
+function obterChavePlacar() {
     return `${eventoAtual}_${modalidadeAtiva}_${sexoAtivo}`;
 }
 
-function atualizarPlacarInterface() {
+function atualizarPlacar() {
+
     const banco = obterBancoPlacares();
-    const chave = obterChaveUnica();
-    const dadosPlacar = banco[chave] || { timeA: "2º A", timeB: "3º B", pontoA: 0, pontoB: 0 };
 
-    const elemNomeA = document.getElementById("nomeTimeA");
-    const elemNomeB = document.getElementById("nomeTimeB");
-    const elemPontoA = document.getElementById("pontoTimeA");
-    const elemPontoB = document.getElementById("pontoTimeB");
+    const chave = obterChavePlacar();
 
-    if (elemNomeA) elemNomeA.innerText = dadosPlacar.timeA;
-    if (elemNomeB) elemNomeB.innerText = dadosPlacar.timeB;
-    if (elemPontoA) elemPontoA.innerText = dadosPlacar.pontoA;
-    if (elemPontoB) elemPontoB.innerText = dadosPlacar.pontoB;
+    if (!banco[chave]) {
+
+        banco[chave] = {
+            timeA: "Turma A",
+            timeB: "Turma B",
+            pontoA: 0,
+            pontoB: 0
+        };
+
+        localStorage.setItem(
+            "bancoPlacaresJogos",
+            JSON.stringify(banco)
+        );
+    }
+
+    document.getElementById("nomeTimeA").innerText =
+        banco[chave].timeA;
+
+    document.getElementById("nomeTimeB").innerText =
+        banco[chave].timeB;
+
+    document.getElementById("pontoTimeA").innerText =
+        banco[chave].pontoA;
+
+    document.getElementById("pontoTimeB").innerText =
+        banco[chave].pontoB;
 }
 
+/* =========================================================
+   ALTERAR NOME DOS TIMES
+========================================================= */
+
+function alterarNomeTime(time) {
+
+    if (usuarioLogado.tipo !== "professor") {
+        alert("Somente o professor pode alterar.");
+        return;
+    }
+
+    const banco = obterBancoPlacares();
+
+    const chave = obterChavePlacar();
+
+    const atual =
+        time === "A"
+            ? banco[chave].timeA
+            : banco[chave].timeB;
+
+    const novo =
+        prompt(`Novo nome do Time ${time}:`, atual);
+
+    if (!novo) return;
+
+    if (time === "A") {
+        banco[chave].timeA = novo;
+    } else {
+        banco[chave].timeB = novo;
+    }
+
+    localStorage.setItem(
+        "bancoPlacaresJogos",
+        JSON.stringify(banco)
+    );
+
+    atualizarPlacar();
+}
+
+/* =========================================================
+   MODIFICAR PLACAR
+========================================================= */
+
 function modificarPlacar(time, valor) {
-Use o código com cuidado.if (!usuarioLogado || usuarioLogado.tipo !== "professor") return;const banco = obterBancoPlacares();const chave = obterChaveUnica();if (!banco[chave]) {banco[chave] = { timeA: "2º A", timeB: "3º B", pontoA: 0, pontoB: 0 };}if (time === 'A') {banco[chave].pontoA = Math.max(0, banco[chave].pontoA + valor);} else if (time === 'B') {banco[chave].pontoB = Math.max(0, banco[chave].pontoB + valor);}localStorage.setItem("bancoPlacaresJogos", JSON.stringify(banco));atualizarPlacarInterface();}// --- CORREÇÃO DO SALVAMENTO DE NOMES DOS TIMES ---function alterarNomeTime(time) {if (!usuarioLogado || usuarioLogado.tipo !== "professor") {alert("Apenas professores podem alterar o nome das equipes.");return;}const banco = obterBancoPlacares();const chave = obterChaveUnica();if (!banco[chave]) {banco[chave] = { timeA: "2º A", timeB: "3º B", pontoA: 0, pontoB: 0 };}const nomeAtual = time === 'A' ? banco[chave].timeA : banco[chave].timeB;const novoNome = prompt(Digite o nome do Time ${time}:, nomeAtual);if (!novoNome || novoNome.trim() === "") return;if (time === 'A') banco[chave].timeA = novoNome.trim();if (time === 'B') banco[chave].timeB = novoNome.trim();localStorage.setItem("bancoPlacaresJogos", JSON.stringify(banco));atualizarPlacarInterface();}function resetarPlacar() {if (!usuarioLogado || usuarioLogado.tipo !== "professor") return;if (!confirm("Deseja zerar as pontuações e redefinir as equipes deste jogo?")) return;const banco = obterBancoPlacares();const chave = obterChaveUnica();banco[chave] = { timeA: "2º A", timeB: "3º B", pontoA: 0, pontoB: 0 };localStorage.setItem("bancoPlacaresJogos", JSON.stringify(banco));atualizarPlacarInterface();}function logout() {localStorage.removeItem("usuarioLogado");localStorage.removeItem("tipo");localStorage.removeItem("nomeAlunoLogado");window.location.href = "login.html";}
+
+    if (usuarioLogado.tipo !== "professor") return;
+
+    const banco = obterBancoPlacares();
+
+    const chave = obterChavePlacar();
+
+    if (time === "A") {
+
+        banco[chave].pontoA =
+            Math.max(0, banco[chave].pontoA + valor);
+
+    } else {
+
+        banco[chave].pontoB =
+            Math.max(0, banco[chave].pontoB + valor);
+    }
+
+    localStorage.setItem(
+        "bancoPlacaresJogos",
+        JSON.stringify(banco)
+    );
+
+    atualizarPlacar();
+}
+
+/* =========================================================
+   RESETAR PLACAR
+========================================================= */
+
+function resetarPlacar() {
+
+    if (usuarioLogado.tipo !== "professor") return;
+
+    if (!confirm("Resetar placar?")) return;
+
+    const banco = obterBancoPlacares();
+
+    const chave = obterChavePlacar();
+
+    banco[chave] = {
+        timeA: "Turma A",
+        timeB: "Turma B",
+        pontoA: 0,
+        pontoB: 0
+    };
+
+    localStorage.setItem(
+        "bancoPlacaresJogos",
+        JSON.stringify(banco)
+    );
+
+    atualizarPlacar();
+}
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+function logout() {
+
+    localStorage.removeItem("usuarioLogado");
+    localStorage.removeItem("tipo");
+    localStorage.removeItem("nomeAlunoLogado");
+
+    window.location.href = "login.html";
+}
