@@ -4,6 +4,18 @@
     <meta charset="UTF-8">
     <title>Dashboard</title>
     <link rel="stylesheet" href="style.css">
+    <script>
+        // Trava nativa para impedir exibição de lixo antigo na tela
+        (function verificarSessaoImediata() {
+            const usuario = localStorage.getItem("usuarioLogado");
+            if (!usuario) {
+                window.location.href = "login.html";
+            }
+            if (localStorage.getItem("temaEscuro") === "ativo") {
+                document.documentElement.setAttribute("data-theme", "dark");
+            }
+        })();
+    </script>
 </head>
 <body>
     <header>
@@ -15,7 +27,7 @@
             📌 Inscrições para: <span id="nomeEventoAtual">Carregando...</span>
         </div>
         <div class="header-actions">
-            <div>Bem-vindo, <strong id="nomeExibicao">...</strong></div>
+            <div>Bem-vindoo, <strong id="nomeExibicao">Carregando...</strong></div>
             <div>
                 <button onclick="window.location.href='eventos.html'" class="btn-logout" style="margin-right:8px;">Trocar Evento</button>
                 <button onclick="logout()" class="btn-logout">Sair</button>
@@ -35,23 +47,17 @@
             </h3>
             
             <div style="display: flex; justify-content: center; align-items: center; gap: 3rem; margin-bottom: 1.5rem;">
-                <!-- Time A -->
                 <div>
                     <div id="nomeTimeA" style="font-weight: 800; font-size: 1.2rem; color: var(--text-main); margin-bottom: 5px; cursor: pointer;" onclick="alterarNomeTime('A')">2º A</div>
                     <span id="pontoTimeA" style="font-size: 4rem; font-weight: 900; color: var(--vermelho); line-height: 1;">0</span>
                 </div>
-                
-                <!-- Divisor X -->
                 <div style="font-size: 2rem; font-weight: 900; color: var(--text-sub);">X</div>
-                
-                <!-- Time B -->
                 <div>
                     <div id="nomeTimeB" style="font-weight: 800; font-size: 1.2rem; color: var(--text-main); margin-bottom: 5px; cursor: pointer;" onclick="alterarNomeTime('B')">3º B</div>
                     <span id="pontoTimeB" style="font-size: 4rem; font-weight: 900; color: var(--vermelho); line-height: 1;">0</span>
                 </div>
             </div>
 
-            <!-- Controles do Placar (Liberados via script apenas para o Professor) -->
             <div id="controlesPlacar" style="display: none; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap;">
                 <button onclick="modificarPlacar('A', 1)" style="background: var(--vermelho); color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 700; cursor: pointer;">+ Time A</button>
                 <button onclick="modificarPlacar('A', -1)" style="background: var(--vermelho); color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 700; cursor: pointer;">- Time A</button>
@@ -87,7 +93,11 @@
             </table>
         </div>
     </div>
-    <script src="script.js"></script>
+    <!-- Alterado para v=150 para quebrar o cache de script antigo do seu PC de uma vez por todas -->
+    <script src="script.js?v=150"></script>
 </body>
 </html>
+<<<<<<< HEAD
 // alterado por henzo2
+=======
+>>>>>>> 29b41b3f2c99a8e424eab7636ff762683ae6dd1f

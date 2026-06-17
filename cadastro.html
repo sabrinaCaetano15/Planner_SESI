@@ -44,17 +44,44 @@
         </div>
     </div>
     <script>
-        function registrar() {
+        async function registrar() {
             const nome = document.getElementById("cadNome").value.trim();
             const cpf = document.getElementById("cadCPF").value.replace(/\D/g,'');
             const data = document.getElementById("cadNasc").value;
             const senha = document.getElementById("cadSenha").value;
-            if(!nome || cpf.length < 11 || !data || !senha) return alert("Preencha tudo!");
-            let users = JSON.parse(localStorage.getItem("usuariosAtletas")) || [];
-            if(users.find(u => u.cpf === cpf)) return alert("CPF já cadastrado!");
-            users.push({nome, cpf, data, senha});
-            localStorage.setItem("usuariosAtletas", JSON.stringify(users));
-            alert("Cadastro realizado!"); window.location.href="login.html";
+
+            if(!nome || cpf.length < 11 || !data || !senha) {
+                return alert("Por favor, preencha todos os campos corretamente!");
+            }
+
+            try {
+                // Envia os dados estruturados rumo ao endpoint do api.php
+                const resposta = await fetch("api.php", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        acao: "cadastrar_aluno",
+                        nome: nome,
+                        cpf: cpf,
+                        senha: senha
+                    })
+                });
+
+                const dados = await resposta.json();
+
+                if (dados.sucesso) {
+                    alert("Cadastro realizado com sucesso via MySQL!");
+                    window.location.href = "login.html";
+                } else {
+                    alert(dados.mensagem);
+                }
+
+            } catch (erro) {
+                console.error("Erro técnico no envio do cadastro:", erro);
+                alert("Erro ao conectar com o servidor local.");
+            }
         }
     </script>
 </body>
