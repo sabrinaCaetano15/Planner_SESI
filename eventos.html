@@ -1,44 +1,127 @@
-```html
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <title>Eventos Disponíveis - Jogos Escolares</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>Eventos - Jogos Escolares</title>
+<link rel="stylesheet" href="style.css">
 
-    <script>
-        (function() {
-            if (localStorage.getItem("temaEscuro") === "ativo") {
-                document.documentElement.setAttribute("data-theme", "dark");
-            }
-        })();
+<script>
+(function() {
+    if (localStorage.getItem("temaEscuro") === "ativo") {
+        document.documentElement.setAttribute("data-theme", "dark");
+    }
+})();
 
-        function toggleDarkMode() {
-            const html = document.documentElement;
-            const btn = document.getElementById("darkModeBtn");
+function toggleDarkMode() {
+    const html = document.documentElement;
+    const btn = document.getElementById("darkModeBtn");
 
-            if (html.getAttribute("data-theme") === "dark") {
-                html.removeAttribute("data-theme");
-                localStorage.setItem("temaEscuro", "inativo");
-                btn.innerText = "🌙";
-            } else {
-                html.setAttribute("data-theme", "dark");
-                localStorage.setItem("temaEscuro", "ativo");
-                btn.innerText = "☀️";
-            }
-        }
+    if (html.getAttribute("data-theme") === "dark") {
+        html.removeAttribute("data-theme");
+        localStorage.setItem("temaEscuro", "inativo");
+        btn.innerText = "🌙";
+    } else {
+        html.setAttribute("data-theme", "dark");
+        localStorage.setItem("temaEscuro", "ativo");
+        btn.innerText = "☀️";
+    }
+}
+</script>
 
-        document.addEventListener("DOMContentLoaded", () => {
-            const btn = document.getElementById("darkModeBtn");
+<style>
+/* =========================
+   EXTRAS VISUAIS DO PAINEL
+========================= */
 
-            if (btn) {
-                btn.innerText =
-                    document.documentElement.getAttribute("data-theme") === "dark"
-                        ? "☀️"
-                        : "🌙";
-            }
-        });
-    </script>
+.btn-excluir-evento{
+    background:#1e293b;
+    color:white;
+    border:none;
+    padding:10px 14px;
+    border-radius:12px;
+    font-weight:800;
+    cursor:pointer;
+    transition:0.3s;
+    width:100%;
+}
+
+.btn-excluir-evento:hover{
+    background:#0f172a;
+    transform: translateY(-2px);
+}
+
+.event-card{
+    transition:0.3s ease;
+}
+
+.event-card:hover{
+    transform: translateY(-6px);
+}
+
+.event-banner{
+    position:relative;
+    font-size:1.4rem;
+    letter-spacing:0.5px;
+}
+
+.event-body{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.event-info{
+    background:var(--bg-light);
+    padding:8px 12px;
+    border-radius:10px;
+    font-size:0.9rem;
+}
+
+.event-title{
+    font-size:1.3rem;
+    font-weight:900;
+    color:var(--text-main);
+}
+
+/* FORMULÁRIO MAIS MODERNO */
+.form-box input{
+    border-radius:12px;
+    border:2px solid var(--border-color);
+    padding:12px;
+    transition:0.3s;
+}
+
+.form-box input:focus{
+    border-color:var(--vermelho);
+    box-shadow:0 0 0 4px var(--vermelho-light);
+}
+
+.btn-criar-evento{
+    background:var(--vermelho);
+    color:white;
+    border:none;
+    padding:12px;
+    border-radius:12px;
+    font-weight:900;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.btn-criar-evento:hover{
+    background:var(--vermelho-dark);
+    transform:translateY(-2px);
+}
+
+.actions-evento{
+    display:flex;
+    gap:10px;
+    margin-top:10px;
+}
+
+.actions-evento button{
+    flex:1;
+}
+</style>
 </head>
 
 <body>
@@ -51,258 +134,189 @@
 <div class="container">
 
     <div class="header-actions">
-        <div>Selecione ou gerencie os eventos disponíveis.</div>
+        <div>Gerencie e participe dos eventos escolares</div>
     </div>
 
-    <!-- GERENCIADOR DE EVENTOS -->
-    <div id="painelProfessorEventos"
-         class="gerenciador-eventos"
-         style="display:none;">
+    <!-- PAINEL PROFESSOR -->
+    <div id="painelProfessorEventos" class="list" style="display:none;margin-bottom:20px;">
 
-        <div class="gerenciador-header">
-            <h3>⚙️ Gerenciar Eventos</h3>
-            <span>Crie, edite e remova eventos do sistema.</span>
-        </div>
+        <h3 style="margin-bottom:15px;font-weight:900;color:var(--text-main)">
+            ⚙️ Gerenciar Eventos
+        </h3>
 
-        <div class="gerenciador-form">
+        <div class="form-box">
 
-            <input
-                type="text"
-                id="novoEventoNome"
-                placeholder="🏆 Nome do Evento">
+            <input id="novoEventoNome" placeholder="Nome do evento">
+            <input id="novoEventoPeriodo" placeholder="Período">
+            <input id="novoEventoLocal" placeholder="Local">
 
-            <input
-                type="text"
-                id="novoEventoPeriodo"
-                placeholder="📅 Período">
-
-            <input
-                type="text"
-                id="novoEventoLocal"
-                placeholder="📍 Local">
-
-            <button
-                onclick="adicionarEvento()"
-                class="btn-criar-evento">
-                ➕ Criar Evento
+            <button class="btn-criar-evento" onclick="adicionarEvento()">
+                + Criar Evento
             </button>
 
         </div>
-
     </div>
 
-    <!-- LISTA DE EVENTOS -->
+    <!-- LISTA -->
     <div class="events-grid" id="listaEventos"></div>
 
 </div>
 
 <script>
 
-function obterEventos() {
-
+function obterEventos(){
     let eventos = JSON.parse(localStorage.getItem("eventosSistema"));
 
-    if (!eventos) {
+    if(!eventos){
         eventos = [
-            {
-                id: 1,
-                nome: "Interclasse",
-                periodo: "10 a 20 de Junho",
-                local: "Sesi CE255",
-                cor: "#dc2626",
-                icone: "⚽"
-            },
-            {
-                id: 2,
-                nome: "Intersesi",
-                periodo: "15 a 18 de Setembro",
-                local: "Araras",
-                cor: "#0284c7",
-                icone: "🏀"
-            }
+            {id:1,nome:"Interclasse",periodo:"10 a 20 Junho",local:"Sesi",cor:"#dc2626",icone:"⚽"},
+            {id:2,nome:"Intersesi",periodo:"15 a 18 Setembro",local:"Araras",cor:"#0284c7",icone:"🏀"}
         ];
-
-        localStorage.setItem("eventosSistema", JSON.stringify(eventos));
+        localStorage.setItem("eventosSistema",JSON.stringify(eventos));
     }
 
     return eventos;
 }
 
-function renderEventos() {
+function renderEventos(){
 
     const container = document.getElementById("listaEventos");
     const eventos = obterEventos();
-
     const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
 
     container.innerHTML = "";
 
-    eventos.forEach(evento => {
+    eventos.forEach(e => {
 
         container.innerHTML += `
         <div class="event-card">
 
-            <div class="event-banner" style="background:${evento.cor}">
-                ${evento.icone} ${evento.nome}
-                <span class="event-badge">Aberto</span>
+            <div class="event-banner" style="background:${e.cor}">
+                ${e.icone} ${e.nome}
+                <span class="event-badge">ABERTO</span>
             </div>
 
             <div class="event-body">
 
-                <div class="event-title">${evento.nome}</div>
+                <div class="event-title">${e.nome}</div>
 
-                <div class="event-info">
-                    📅 <strong>Período:</strong> ${evento.periodo}
-                </div>
+                <div class="event-info">📅 ${e.periodo}</div>
+                <div class="event-info">📍 ${e.local}</div>
 
-                <div class="event-info">
-                    📍 <strong>Local:</strong> ${evento.local}
-                </div>
-
-                <button
-                    onclick="selecionarEvento('${evento.nome}')"
-                    class="btn-inscrever"
-                    style="background:${evento.cor}">
-                    Participar Deste Torneio
+                <button class="btn-inscrever"
+                        style="background:${e.cor}"
+                        onclick="selecionarEvento('${e.nome}')">
+                    Participar
                 </button>
 
                 ${
                     usuario?.tipo === "professor"
                     ? `
-                        <button
-                            onclick="editarEvento(${evento.id})"
-                            class="btn-logout"
-                            style="margin-top:10px;width:100%;">
+                    <div class="actions-evento">
+
+                        <button class="btn-logout"
+                                onclick="editarEvento(${e.id})">
                             ✏️ Editar
                         </button>
 
-                        <button
-                            onclick="apagarEvento(${evento.id})"
-                            class="btn-remover-evento"
-                            style="margin-top:8px;width:100%;">
-                            🗑️ Apagar Evento
+                        <button class="btn-excluir-evento"
+                                onclick="excluirEvento(${e.id})">
+                            🗑 Excluir
                         </button>
-                    `
+
+                    </div>`
                     : ""
                 }
 
             </div>
-
         </div>`;
     });
 }
 
-function adicionarEvento() {
+function adicionarEvento(){
 
     const nome = document.getElementById("novoEventoNome").value.trim();
     const periodo = document.getElementById("novoEventoPeriodo").value.trim();
     const local = document.getElementById("novoEventoLocal").value.trim();
 
-    if (!nome || !periodo || !local) {
-        alert("Preencha todos os campos.");
+    if(!nome || !periodo || !local){
+        alert("Preencha tudo!");
         return;
     }
 
     const eventos = obterEventos();
 
     eventos.push({
-        id: Date.now(),
+        id:Date.now(),
         nome,
         periodo,
         local,
-        cor: "#dc2626",
-        icone: "🏆"
+        cor:"#dc2626",
+        icone:"🏆"
     });
 
-    localStorage.setItem(
-        "eventosSistema",
-        JSON.stringify(eventos)
-    );
-
+    localStorage.setItem("eventosSistema",JSON.stringify(eventos));
     renderEventos();
 
-    document.getElementById("novoEventoNome").value = "";
-    document.getElementById("novoEventoPeriodo").value = "";
-    document.getElementById("novoEventoLocal").value = "";
+    document.getElementById("novoEventoNome").value="";
+    document.getElementById("novoEventoPeriodo").value="";
+    document.getElementById("novoEventoLocal").value="";
 }
 
-function editarEvento(id) {
+function editarEvento(id){
 
     const eventos = obterEventos();
-    const evento = eventos.find(e => e.id === id);
+    const e = eventos.find(x=>x.id===id);
+    if(!e) return;
 
-    if (!evento) return;
+    const nome = prompt("Nome:",e.nome);
+    const periodo = prompt("Período:",e.periodo);
+    const local = prompt("Local:",e.local);
 
-    const novoNome = prompt("Nome:", evento.nome);
-    const novoPeriodo = prompt("Período:", evento.periodo);
-    const novoLocal = prompt("Local:", evento.local);
+    if(!nome || !periodo || !local) return;
 
-    if (!novoNome || !novoPeriodo || !novoLocal) return;
+    e.nome = nome;
+    e.periodo = periodo;
+    e.local = local;
 
-    evento.nome = novoNome;
-    evento.periodo = novoPeriodo;
-    evento.local = novoLocal;
-
-    localStorage.setItem(
-        "eventosSistema",
-        JSON.stringify(eventos)
-    );
-
+    localStorage.setItem("eventosSistema",JSON.stringify(eventos));
     renderEventos();
 }
 
-function apagarEvento(id) {
+function excluirEvento(id){
+
+    if(!confirm("Excluir evento?")) return;
 
     let eventos = obterEventos();
+    const ev = eventos.find(e=>e.id===id);
 
-    if (eventos.length <= 1) {
-        alert("É necessário manter pelo menos um evento.");
-        return;
-    }
+    eventos = eventos.filter(e=>e.id!==id);
 
-    const evento = eventos.find(e => e.id === id);
+    localStorage.setItem("eventosSistema",JSON.stringify(eventos));
 
-    if (!evento) return;
+    let atletas = JSON.parse(localStorage.getItem("atletasInscritos")) || [];
+    atletas = atletas.filter(a=>a.evento!==ev.nome);
+    localStorage.setItem("atletasInscritos",JSON.stringify(atletas));
 
-    const confirmar = confirm(
-        `Deseja realmente apagar o evento "${evento.nome}"?`
-    );
-
-    if (!confirmar) return;
-
-    eventos = eventos.filter(e => e.id !== id);
-
-    localStorage.setItem(
-        "eventosSistema",
-        JSON.stringify(eventos)
-    );
+    const placares = JSON.parse(localStorage.getItem("bancoPlacaresJogos")) || {};
+    Object.keys(placares).forEach(k=>{
+        if(k.startsWith(ev.nome+"_")) delete placares[k];
+    });
+    localStorage.setItem("bancoPlacaresJogos",JSON.stringify(placares));
 
     renderEventos();
 }
 
-function selecionarEvento(nomeEvento) {
-
-    localStorage.setItem(
-        "eventoSelecionado",
-        nomeEvento
-    );
-
-    window.location.href =
-        localStorage.getItem("usuarioLogado")
-        ? "index.html"
-        : "login.html";
+function selecionarEvento(nome){
+    localStorage.setItem("eventoSelecionado",nome);
+    window.location.href="index.html";
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded",()=>{
 
-    const usuario =
-        JSON.parse(localStorage.getItem("usuarioLogado"));
-
-    if (usuario?.tipo === "professor") {
-
-        document.getElementById(
-            "painelProfessorEventos"
-        ).style.display = "block";
+    const u = JSON.parse(localStorage.getItem("usuarioLogado"));
+    if(u?.tipo==="professor"){
+        document.getElementById("painelProfessorEventos").style.display="block";
     }
 
     renderEventos();
@@ -312,4 +326,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </body>
 </html>
-```

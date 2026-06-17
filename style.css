@@ -108,87 +108,133 @@ th:last-child, td:last-child { text-align: right; }
     .search-container input { text-align: center; }
     .contador-badge { text-align: center; }
 }
-/* =========================================================
-   GERENCIADOR DE EVENTOS
-========================================================= */
-
-.gerenciador-eventos{
-    background: var(--bg-card);
-    border-radius: 20px;
-    padding: 24px;
-    margin-bottom: 25px;
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow);
+.btn-excluir-evento{
+    background:#dc2626;
+    color:white;
+    border:none;
+    padding:8px 16px;
+    border-radius:10px;
+    font-weight:700;
+    cursor:pointer;
+    transition:var(--transition);
 }
 
-.gerenciador-header{
+.btn-excluir-evento:hover{
+    background:#991b1b;
+    transform:translateY(-2px);
+}
+.painel-eventos {
+    border-top: 4px solid var(--vermelho);
+}
+
+.titulo-gerenciamento {
+    color: var(--text-main);
+    font-size: 1.3rem;
+    font-weight: 800;
     margin-bottom: 20px;
 }
 
-.gerenciador-header h3{
-    color: var(--vermelho);
-    font-size: 1.2rem;
-    font-weight: 800;
-    margin-bottom: 5px;
+.event-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
 }
 
-.gerenciador-header span{
-    color: var(--text-sub);
-    font-size: 0.9rem;
-}
-
-.gerenciador-form{
-    display: grid;
-    grid-template-columns: 2fr 1.2fr 1.2fr 180px;
-    gap: 12px;
-    align-items: center;
-}
-
-.gerenciador-form input{
-    height: 48px;
-}
-
-.btn-criar-evento{
-    width: 100%;
-    height: 48px;
-    background: var(--vermelho);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-weight: 700;
+.btn-editar-evento {
+    flex: 1;
+    background: var(--bg-light);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    padding: 10px;
+    border-radius: 10px;
     cursor: pointer;
+    font-weight: 700;
     transition: var(--transition);
 }
 
-.btn-criar-evento:hover{
-    background: var(--vermelho-dark);
+.btn-editar-evento:hover {
     transform: translateY(-2px);
 }
 
-.btn-remover-evento{
-    width: 100%;
+.btn-excluir-evento {
+    flex: 1;
     background: #dc2626;
     color: white;
     border: none;
     padding: 10px;
     border-radius: 10px;
-    font-weight: 700;
     cursor: pointer;
+    font-weight: 700;
     transition: var(--transition);
 }
 
-.btn-remover-evento:hover{
+.btn-excluir-evento:hover {
     background: #991b1b;
+    transform: translateY(-2px);
+}
+/* =========================================================
+   FORMULÁRIO DE EVENTOS (PADRÃO DASHBOARD)
+========================================================= */
+
+.form-eventos{
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 12px;
+    align-items: stretch;
+    padding: 1.5rem;
+    border-radius: 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    transition: var(--transition);
 }
 
-@media (max-width: 768px){
+/* inputs mais “card UI” */
+.form-eventos input{
+    border: 2px solid var(--border-color);
+    background: var(--bg-light);
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-main);
+    transition: var(--transition);
+}
 
-    .gerenciador-form{
+/* foco consistente com o resto do sistema */
+.form-eventos input:focus{
+    border-color: var(--vermelho);
+    box-shadow: 0 0 0 4px var(--vermelho-light);
+    background: var(--bg-card);
+    transform: translateY(-1px);
+}
+
+/* botão criar evento alinhado ao sistema */
+.btn-criar-evento{
+    background: var(--vermelho);
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+    box-shadow: var(--shadow);
+}
+
+/* hover mais “premium” */
+.btn-criar-evento:hover{
+    background: var(--vermelho-dark);
+    transform: translateY(-2px);
+}
+
+/* responsivo igual seu sistema */
+@media (max-width: 768px){
+    .form-eventos{
         grid-template-columns: 1fr;
     }
 
     .btn-criar-evento{
         width: 100%;
     }
-
 }
