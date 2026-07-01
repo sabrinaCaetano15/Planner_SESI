@@ -147,7 +147,8 @@ function toggleDarkMode() {
         <div class="form-box">
 
             <input id="novoEventoNome" placeholder="Nome do evento">
-            <input id="novoEventoPeriodo" placeholder="Período">
+            <input type="date" id="novoEventoInicio">
+            <input type="date" id="novoEventoFim">
             <input id="novoEventoLocal" placeholder="Local">
 
             <button class="btn-criar-evento" onclick="adicionarEvento()">
@@ -164,24 +165,27 @@ function toggleDarkMode() {
 
 <script>
 
-function obterEventos(){
-    let eventos = JSON.parse(localStorage.getItem("eventosSistema"));
+async function obterEventos() {
 
-    if(!eventos){
-        eventos = [
-            {id:1,nome:"Interclasse",periodo:"10 a 20 Junho",local:"Sesi",cor:"#dc2626",icone:"⚽"},
-            {id:2,nome:"Intersesi",periodo:"15 a 18 Setembro",local:"Araras",cor:"#0284c7",icone:"🏀"}
-        ];
-        localStorage.setItem("eventosSistema",JSON.stringify(eventos));
-    }
+    const resposta = await fetch("eventos.php");
 
-    return eventos;
+    const eventosBanco = await resposta.json();
+
+    return eventosBanco.map(e => ({
+        id: e.id,
+        nome: e.nome,
+        periodo: `${e.data_inicio} até ${e.data_fim}`,
+        local: e.local,
+        cor: "#dc2626",
+        icone: "🏆"
+    }));
+
 }
 
-function renderEventos(){
+async function renderEventos(){
 
     const container = document.getElementById("listaEventos");
-    const eventos = obterEventos();
+    const eventos = await obterEventos();
     const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
 
     container.innerHTML = "";
@@ -233,95 +237,334 @@ function renderEventos(){
     });
 }
 
-function adicionarEvento(){
+async function obterEventos() {
+
+    const resposta = await fetch("eventos.php");
+
+    const eventosBanco = await resposta.json();
+
+    return eventosBanco.map(e => ({
+        id: e.id,
+        nome: e.nome,
+        periodo: `${e.data_inicio} até ${e.data_fim}`,
+        local: e.local,
+        cor: "#dc2626",
+        icone: "🏆"
+    }));
+
+}
+
+async function renderEventos(){
+
+    const container = document.getElementById("listaEventos");
+    const eventos = await obterEventos();
+    const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
+
+    container.innerHTML = "";
+
+    eventos.forEach(e => {
+
+        container.innerHTML += `
+        <div class="event-card">
+
+            <div class="event-banner" style="background:${e.cor}">
+                ${e.icone} ${e.nome}
+                <span class="event-badge">ABERTO</span>
+            </div>
+
+            <div class="event-body">
+
+                <div class="event-title">${e.nome}</div>
+
+                <div class="event-info">📅 ${e.periodo}</div>
+                <div class="event-info">📍 ${e.local}</div>
+
+                <button class="btn-inscrever"
+                        style="background:${e.cor}"
+                        onclick="selecionarEvento('${e.nome}')">
+                    Participar
+                </button>
+
+                ${
+                    usuario?.tipo === "professor"
+                    ? `
+                    <div class="actions-evento">
+
+                        <button class="btn-logout"
+                                onclick="editarEvento(${e.id})">
+                            ✏️ Editar
+                        </button>
+
+                        <button class="btn-excluir-evento"
+                                onclick="excluirEvento(${e.id})">
+                            🗑 Excluir
+                        </button>
+
+                    </div>`
+                    : ""
+                }
+
+            </div>
+        </div>`;
+    });
+}
+
+async function obterEventos() {
+
+    const resposta = await fetch("eventos.php");
+    const eventosBanco = await resposta.json();
+
+    return eventosBanco.map(e => ({
+        id: e.id,
+        nome: e.nome,
+        periodo: `${e.data_inicio} até ${e.data_fim}`,
+        local: e.local,
+        cor: "#dc2626",
+        icone: "🏆"
+    }));
+
+}
+
+async function renderEventos(){
+
+    const container = document.getElementById("listaEventos");
+    const eventos = await obterEventos();
+    const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
+
+    container.innerHTML = "";
+
+    eventos.forEach(e => {
+
+        container.innerHTML += `
+        <div class="event-card">
+
+            <div class="event-banner" style="background:${e.cor}">
+                ${e.icone} ${e.nome}
+                <span class="event-badge">ABERTO</span>
+            </div>
+
+            <div class="event-body">
+
+                <div class="event-title">${e.nome}</div>
+
+                <div class="event-info">📅 ${e.periodo}</div>
+                <div class="event-info">📍 ${e.local}</div>
+
+                <button
+                    class="btn-inscrever"
+                    style="background:${e.cor}"
+                    onclick="selecionarEvento(${e.id}, '${e.nome}')">
+                    Participar
+                </button>
+
+                ${
+                    usuario?.tipo === "professor"
+                    ? `
+                    <div class="actions-evento">
+
+                        <button class="btn-logout"
+                                onclick="editarEvento(${e.id})">
+                            ✏️ Editar
+                        </button>
+
+                        <button class="btn-excluir-evento"
+                                onclick="excluirEvento(${e.id})">
+                            🗑 Excluir
+                        </button>
+
+                    </div>`
+                    : ""
+                }
+
+            </div>
+
+        </div>`;
+    });
+
+}
+
+async function adicionarEvento(){
 
     const nome = document.getElementById("novoEventoNome").value.trim();
-    const periodo = document.getElementById("novoEventoPeriodo").value.trim();
+    const inicio = document.getElementById("novoEventoInicio").value;
+    const fim = document.getElementById("novoEventoFim").value;
     const local = document.getElementById("novoEventoLocal").value.trim();
 
-    if(!nome || !periodo || !local){
-        alert("Preencha tudo!");
+    if(!nome || !inicio || !fim || !local){
+        alert("Preencha todos os campos.");
         return;
     }
 
-    const eventos = obterEventos();
+    const resposta = await fetch("eventos.php",{
 
-    eventos.push({
-        id:Date.now(),
-        nome,
-        periodo,
-        local,
-        cor:"#dc2626",
-        icone:"🏆"
+        method:"POST",
+
+        headers:{
+            "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+
+            acao:"criar",
+
+            nome:nome,
+
+            local:local,
+
+            inicio:inicio,
+
+            fim:fim
+
+        })
+
     });
 
-    localStorage.setItem("eventosSistema",JSON.stringify(eventos));
-    renderEventos();
+    const retorno = await resposta.json();
 
-    document.getElementById("novoEventoNome").value="";
-    document.getElementById("novoEventoPeriodo").value="";
-    document.getElementById("novoEventoLocal").value="";
+    if(retorno.sucesso){
+
+        alert("Evento criado com sucesso!");
+
+        document.getElementById("novoEventoNome").value="";
+        document.getElementById("novoEventoInicio").value="";
+        document.getElementById("novoEventoFim").value="";
+        document.getElementById("novoEventoLocal").value="";
+
+        renderEventos();
+
+    }else{
+
+        alert("Erro ao criar evento.");
+
+    }
+
 }
 
-function editarEvento(id){
+async function editarEvento(id){
 
-    const eventos = obterEventos();
-    const e = eventos.find(x=>x.id===id);
+    const eventos = await obterEventos();
+
+    const e = eventos.find(x => x.id == id);
+
     if(!e) return;
 
-    const nome = prompt("Nome:",e.nome);
-    const periodo = prompt("Período:",e.periodo);
-    const local = prompt("Local:",e.local);
+    const nome = prompt("Nome do evento:", e.nome);
+    if(nome === null) return;
 
-    if(!nome || !periodo || !local) return;
+    const local = prompt("Local:", e.local);
+    if(local === null) return;
 
-    e.nome = nome;
-    e.periodo = periodo;
-    e.local = local;
+    const inicio = prompt("Data inicial (AAAA-MM-DD):", e.periodo.split(" até ")[0]);
+    if(inicio === null) return;
 
-    localStorage.setItem("eventosSistema",JSON.stringify(eventos));
-    renderEventos();
-}
+    const fim = prompt("Data final (AAAA-MM-DD):", e.periodo.split(" até ")[1]);
+    if(fim === null) return;
 
-function excluirEvento(id){
+    const resposta = await fetch("eventos.php",{
 
-    if(!confirm("Excluir evento?")) return;
+        method:"POST",
 
-    let eventos = obterEventos();
-    const ev = eventos.find(e=>e.id===id);
+        headers:{
+            "Content-Type":"application/json"
+        },
 
-    eventos = eventos.filter(e=>e.id!==id);
+        body:JSON.stringify({
 
-    localStorage.setItem("eventosSistema",JSON.stringify(eventos));
+            acao:"editar",
 
-    let atletas = JSON.parse(localStorage.getItem("atletasInscritos")) || [];
-    atletas = atletas.filter(a=>a.evento!==ev.nome);
-    localStorage.setItem("atletasInscritos",JSON.stringify(atletas));
+            id:id,
 
-    const placares = JSON.parse(localStorage.getItem("bancoPlacaresJogos")) || {};
-    Object.keys(placares).forEach(k=>{
-        if(k.startsWith(ev.nome+"_")) delete placares[k];
+            nome:nome,
+
+            local:local,
+
+            inicio:inicio,
+
+            fim:fim
+
+        })
+
     });
-    localStorage.setItem("bancoPlacaresJogos",JSON.stringify(placares));
 
-    renderEventos();
+    const retorno = await resposta.json();
+
+    if(retorno.sucesso){
+
+        alert("Evento atualizado!");
+
+        renderEventos();
+
+    }else{
+
+        alert("Erro ao atualizar.");
+
+    }
+
 }
 
-function selecionarEvento(nome){
-    localStorage.setItem("eventoSelecionado",nome);
-    window.location.href="index.html";
+async function excluirEvento(id){
+
+    if(!confirm("Deseja realmente excluir este evento?")){
+        return;
+    }
+
+    const resposta = await fetch("eventos.php",{
+
+        method:"POST",
+
+        headers:{
+            "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+
+            acao:"excluir",
+
+            id:id
+
+        })
+
+    });
+
+    const retorno = await resposta.json();
+
+    if(retorno.sucesso){
+
+        alert("Evento excluído!");
+
+        renderEventos();
+
+    }else{
+
+        alert("Erro ao excluir.");
+
+    }
+
 }
 
-document.addEventListener("DOMContentLoaded",()=>{
+function selecionarEvento(id, nome){
 
-    const u = JSON.parse(localStorage.getItem("usuarioLogado"));
-    if(u?.tipo==="professor"){
-        document.getElementById("painelProfessorEventos").style.display="block";
+    localStorage.setItem("eventoSelecionado", JSON.stringify({
+        id:id,
+        nome:nome
+    }));
+
+    window.location.href = "login.html";
+
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const painel = document.getElementById("painelProfessorEventos");
+    const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
+
+    if(painel && usuario?.tipo === "professor"){
+        painel.style.display = "block";
     }
 
     renderEventos();
-});
 
+});
 </script>
 
 </body>

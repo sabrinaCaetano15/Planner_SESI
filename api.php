@@ -12,69 +12,89 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // ROTA: LOGIN VIA BACKEND
     // ==========================================
     if ($acao === 'login') {
-        $usuario = $input['usuario'] ?? ''; 
-        $senha = $input['senha'] ?? '';
-        $tipo = $input['tipo'] ?? '';
 
-        try {
-            if ($tipo === 'professor') {
-                if ($usuario === 'prof' && $senha === '123') {
-                    echo json_encode([
-                        'sucesso' => true,
-                        'usuario' => [
-                            'nome' => 'Prof. Jomar',
-                            'tipo' => 'professor',
-                            'cpf' => 'PROF'
-                        ]
-                    ]);
-                } else {
-                    echo json_encode(['sucesso' => false, 'mensagem' => 'Senha ou usuário do professor incorretos!']);
-                }
-            } else {
-                $cpfLimpo = preg_replace('/\D/', '', $usuario);
+    $usuario = trim($input['usuario'] ?? '');
+    $senha = $input['senha'] ?? '';
+    $tipo = $input['tipo'] ?? '';
 
-                // Formata com pontos e traço caso o banco de dados exija a formatação exata
-                $cpfFormatado = '';
-                if (strlen($cpfLimpo) === 11) {
-                    $cpfFormatado = substr($cpfLimpo, 0, 3) . '.' . 
-                                    substr($cpfLimpo, 3, 3) . '.' . 
-                                    substr($cpfLimpo, 6, 3) . '-' . 
-                                    substr($cpfLimpo, 9, 2);
-                }
+    try {
 
-                // Busca o aluno combinando o CPF puro ou formatado
-                $sql = "SELECT nome, tipo, cpf, senha FROM usuarios WHERE (cpf = :cpfLimpo OR cpf = :cpfFormatado) AND tipo = 'aluno' LIMIT 1";
-                $stmt = $pdo->prepare($sql);
-                $stmt->bindParam(':cpfLimpo', $cpfLimpo);
-                $stmt->bindParam(':cpfFormatado', $cpfFormatado);
-                $stmt->execute();
-                $aluno = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($tipo === "aluno") {
 
-                if ($aluno) {
-                    // Confere se a senha condiz com o hash armazenado no BCrypt
-                    if (!empty($aluno['senha']) && !password_verify($senha, $aluno['senha'])) {
-                        echo json_encode(['sucesso' => false, 'mensagem' => 'Senha incorreta para este CPF!']);
-                        exit;
-                    }
+            // Aluno faz login pelo CPF
+            $cpf = preg_replace('/\D/', '', $usuario);
 
-                    echo json_encode([
-                        'sucesso' => true,
-                        'usuario' => [
-                            'nome' => $aluno['nome'], 
-                            'tipo' => 'aluno',
-                            'cpf' => $aluno['cpf']
-                        ]
-                    ]);
-                } else {
-                    echo json_encode(['sucesso' => false, 'mensagem' => 'CPF não encontrado no banco de dados!']);
-                }
-            }
-        } catch (PDOException $e) {
-            echo json_encode(['sucesso' => false, 'mensagem' => 'Erro no servidor: ' . $e->getMessage()]);
+            $sql = "SELECT id, nome, cpf, senha, tipo
+                    FROM usuarios
+                    WHERE cpf = :usuario
+                    AND tipo = 'aluno'
+                    LIMIT 1";
+
+        } else {
+
+            // Professor (e futuramente admin) faz login pelo nome
+            $sql = "SELECT id, nome, cpf, senha, tipo
+                    FROM usuarios
+                    WHERE nome = :usuario
+                    AND tipo = :tipo
+                    LIMIT 1";
         }
-        exit;
+
+        $stmt = $pdo->prepare($sql);
+
+        if ($tipo === "aluno") {
+            $stmt->bindValue(":usuario", $cpf);
+        } else {
+            $stmt->bindValue(":usuario", $usuario);
+            $stmt->bindValue(":tipo", $tipo);
+        }
+
+        $stmt->execute();
+
+        $dados = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$dados) {
+
+            echo json_encode([
+                "sucesso" => false,
+                "mensagem" => "Usuário não encontrado."
+            ]);
+
+            exit;
+        }
+
+        if (!password_verify($senha, $dados["senha"])) {
+
+            echo json_encode([
+                "sucesso" => false,
+                "mensagem" => "Senha incorreta."
+            ]);
+
+            exit;
+        }
+
+        $_SESSION["usuario"] = $dados["id"];
+
+        echo json_encode([
+            "sucesso" => true,
+            "usuario" => [
+                "id" => $dados["id"],
+                "nome" => $dados["nome"],
+                "cpf" => $dados["cpf"],
+                "tipo" => $dados["tipo"]
+            ]
+        ]);
+
+    } catch (PDOException $e) {
+
+        echo json_encode([
+            "sucesso" => false,
+            "mensagem" => $e->getMessage()
+        ]);
     }
 
+    exit;
+}
     // ==========================================
     // ROTA: REGISTRAR CONTA DE ALUNO
     // ==========================================

@@ -56,42 +56,47 @@ document.addEventListener("DOMContentLoaded", () => {
 
     carregarUsuario();
 
-    eventoAtual =
-        localStorage.getItem("eventoSelecionado") || "Interclasse";
+    const eventoSalvo = JSON.parse(localStorage.getItem("eventoSelecionado"));
 
-    atletas =
-        JSON.parse(localStorage.getItem("atletasInscritos")) || [];
+    if (!eventoSalvo) {
+        alert("Selecione um evento antes de continuar.");
+        window.location.href = "eventos.html";
+        return;
+    }
 
-    document.getElementById("nomeEventoAtual").innerText = eventoAtual;
+    eventoAtual = eventoSalvo;
+
+    document.getElementById("nomeEventoAtual").innerText = eventoAtual.nome;
 
     configurarPerfil();
     configurarFiltros();
 
     atualizarDashboard();
     atualizarPlacar();
-});
 
+});
 /* =========================================================
    LOGIN
 ========================================================= */
 
 function carregarUsuario() {
+
     const dadosSessao = localStorage.getItem("usuarioLogado");
 
-    // Debug Técnico: Mostra no console exatamente o que veio do login assim que a página abre
-    console.log("DADOS DA SESSÃO CARREGADOS NO INDEX:", dadosSessao);
+    console.log("usuarioLogado =", dadosSessao);
 
     if (!dadosSessao) {
-        console.warn("Nenhum usuário logado encontrado. Redirecionando para login.html...");
+
+        alert("Nenhum usuário encontrado!");
+
         window.location.href = "login.html";
         return;
     }
 
     usuarioLogado = JSON.parse(dadosSessao);
+
+    console.log(usuarioLogado);
 }
-
-
-
 
 /* =========================================================
    PERFIL
@@ -100,7 +105,7 @@ function carregarUsuario() {
 function configurarPerfil() {
 
     document.getElementById("nomeExibicao").innerText =
-        usuarioLogado.nome;
+        usuarioLogado.nome || "Usuário";
 
     const professor = usuarioLogado.tipo === "professor";
 
@@ -112,8 +117,8 @@ function configurarPerfil() {
 
     document.getElementById("controlesPlacar").style.display =
         professor ? "flex" : "none";
-}
 
+}
 /* =========================================================
    FILTROS
 ========================================================= */
@@ -198,16 +203,17 @@ function renderTabela() {
 
     const filtrados = atletas.filter(a => {
 
-        return (
-            a.evento === eventoAtual &&
-            a.modalidade === modalidadeAtiva &&
-            a.sexo === sexoAtivo &&
-            (
-                a.nome.toLowerCase().includes(busca) ||
-                a.turma.toLowerCase().includes(busca)
-            )
-        );
-    });
+    return (
+        a.evento === eventoAtual &&
+        a.modalidade === modalidadeAtiva &&
+        a.sexo === sexoAtivo &&
+        (
+            (a.nome || "").toLowerCase().includes(busca) ||
+            (a.turma || "").toLowerCase().includes(busca)
+        )
+    );
+
+});
 
     filtrados.forEach(atleta => {
 
@@ -254,7 +260,7 @@ function renderTabela() {
    ADICIONAR
 ========================================================= */
 
-function adicionarAluno() {
+async function adicionarAluno() {
 
     if (!usuarioLogado) return;
 
@@ -264,14 +270,9 @@ function adicionarAluno() {
 
     if (usuarioLogado.tipo === "professor") {
 
-        nome =
-            document.getElementById("nomeAluno").value.trim();
-
-        turma =
-            document.getElementById("turmaAluno").value.trim();
-
-        posicao =
-            document.getElementById("posicaoAluno").value;
+        nome = document.getElementById("nomeAluno").value.trim();
+        turma = document.getElementById("turmaAluno").value.trim();
+        posicao = document.getElementById("posicaoAluno").value;
 
         if (!nome || !turma) {
             alert("Preencha todos os campos.");
@@ -281,7 +282,6 @@ function adicionarAluno() {
     } else {
 
         nome = usuarioLogado.nome;
-
         turma = prompt("Digite sua turma:");
 
         if (!turma) return;
@@ -289,20 +289,36 @@ function adicionarAluno() {
         posicao = "Reserva";
     }
 
-    atletas.push({
-        id: Date.now(),
-        nome,
-        turma,
-        posicao,
-        modalidade: modalidadeAtiva,
-        sexo: sexoAtivo,
-        evento: eventoAtual
+    const resposta = await fetch("atletas.php", {
+
+        method: "POST",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+
+            acao: "criar",
+
+            nome: nome,
+            turma: turma,
+            posicao: posicao,
+            modalidade: modalidadeAtiva,
+            sexo: sexoAtivo,
+            evento: eventoAtual.nome
+
+        })
+
     });
 
-    localStorage.setItem(
-        "atletasInscritos",
-        JSON.stringify(atletas)
-    );
+    const retorno = await resposta.json();
+
+    console.log(retorno);
+
+    if (retorno.sucesso) {
+
+    alert("Atleta inscrito com sucesso!");
 
     atualizarDashboard();
 
@@ -310,7 +326,14 @@ function adicionarAluno() {
 
         document.getElementById("nomeAluno").value = "";
         document.getElementById("turmaAluno").value = "";
+
     }
+    } else {
+
+        alert("Erro ao salvar inscrição.");
+
+    }
+
 }
 
 /* =========================================================
@@ -362,6 +385,16 @@ function removerAtleta(id) {
         "atletasInscritos",
         JSON.stringify(atletas)
     );
+
+    async function carregarAtletas() {
+
+    const resposta = await fetch("atletas.php");
+
+    atletas = await resposta.json();
+
+    atualizarDashboard();
+
+}
 
     atualizarDashboard();
 }
@@ -524,31 +557,4 @@ function logout() {
     localStorage.removeItem("nomeAlunoLogado");
 
     window.location.href = "login.html";
-<<<<<<< HEAD
 }
-=======
-}
-/* =========================================================
-   LOGOUT
-========================================================= */
-function logout() {
-    localStorage.clear(); // Limpa todos os dados salvos de login antigo
-    window.location.href = "login.html"; // Manda de volta de forma segura
-}
-
-function mudarInterface() {
-    const t = document.getElementById("tipo").value;
-    const input = document.getElementById("usuario");
-    
-    document.getElementById("labelUser").innerText = t === "professor" ? "Usuário Professor" : "CPF do Aluno";
-    input.placeholder = t === "professor" ? "Usuário de acesso" : "Apenas números";
-    input.maxLength = t === "professor" ? 50 : 11;
-    document.getElementById("linkCad").style.display = t === "professor" ? "none" : "block";
-    
-    // CORREÇÃO VISUAL: Deixe o campo de senha sempre visível para os dois tipos
-    document.getElementById("group-senha").style.display = "block"; 
-    
-    input.value = "";
-    document.getElementById("senha").value = "";
-}
->>>>>>> 29b41b3f2c99a8e424eab7636ff762683ae6dd1f

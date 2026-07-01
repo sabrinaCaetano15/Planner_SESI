@@ -4,28 +4,18 @@
     <meta charset="UTF-8">
     <title>Login - Jogos Escolares</title>
     <link rel="stylesheet" href="style.css">
+
     <script>
-        (function() {
+        (function () {
             if (localStorage.getItem("temaEscuro") === "ativo") {
                 document.documentElement.setAttribute("data-theme", "dark");
             }
         })();
-        
-        document.addEventListener("DOMContentLoaded", () => {
-            const btn = document.getElementById("darkModeBtn");
-            if (btn) btn.innerText = document.documentElement.getAttribute("data-theme") === "dark" ? "☀️" : "🌙";
-            
-            const inputs = document.querySelectorAll(".login-form input");
-            inputs.forEach(input => {
-                input.addEventListener("keypress", (e) => {
-                    if (e.key === "Enter") fazerLogin();
-                });
-            });
-        });
 
         function toggleDarkMode() {
             const html = document.documentElement;
             const btn = document.getElementById("darkModeBtn");
+
             if (html.getAttribute("data-theme") === "dark") {
                 html.removeAttribute("data-theme");
                 localStorage.setItem("temaEscuro", "inativo");
@@ -38,93 +28,184 @@
         }
     </script>
 </head>
+
 <body class="login-page">
-    <button onclick="toggleDarkMode()" class="dark-mode-toggle" id="darkModeBtn" style="top:25px; transform:none;">🌙</button>
-    <div class="login-box">
-        <div class="login-accent-bar"></div>
-        <div class="login-header"><div class="icon-circle">🏆</div><h2>Acesso</h2></div>
-        <div class="login-form">
-            <div class="input-group">
-                <label>Tipo</label>
-                <select id="tipo" onchange="mudarInterface()">
-                    <option value="aluno">Aluno</option>
-                    <option value="professor">Professor</option>
-                </select>
-            </div>
-            <div class="input-group">
-                <label id="labelUser">CPF do Aluno</label>
-                <input type="text" id="usuario" placeholder="Apenas números" maxlength="11">
-            </div>
-            <div class="input-group" id="group-senha" style="display: none;">
-                <label>Senha</label>
-                <input type="password" id="senha" placeholder="Digite sua senha">
-            </div>
-            <button onclick="fazerLogin()" id="btnEntrar">Entrar</button>
-            <p id="linkCad" style="text-align:center; margin-top:20px;">Novo? <a href="cadastro.html" style="color:var(--vermelho); font-weight:bold; text-decoration:none;">Cadastre-se</a></p>
-            <p style="text-align:center; margin-top:10px;"><a href="eventos.html" style="color:var(--text-sub); text-decoration:none; font-size:0.9rem;">← Voltar para Eventos</a></p>
-        </div>
+
+<button onclick="toggleDarkMode()" class="dark-mode-toggle" id="darkModeBtn" style="top:25px;transform:none;">🌙</button>
+
+<div class="login-box">
+
+    <div class="login-accent-bar"></div>
+
+    <div class="login-header">
+        <div class="icon-circle">🏆</div>
+        <h2>Acesso</h2>
     </div>
 
-    <script>
-        function mudarInterface() {
-            const t = document.getElementById("tipo").value;
-            const input = document.getElementById("usuario");
-            const groupSenha = document.getElementById("group-senha");
-            
-            document.getElementById("labelUser").innerText = t === "professor" ? "Usuário Professor" : "CPF do Aluno";
-            input.placeholder = t === "professor" ? "Usuário de acesso" : "Apenas números";
-            input.maxLength = t === "professor" ? 50 : 11;
-            document.getElementById("linkCad").style.display = t === "professor" ? "none" : "block";
-            
-            groupSenha.style.display = t === "professor" ? "block" : "none";
-            
-            input.value = "";
-            document.getElementById("senha").value = "";
-        }
+    <div class="login-form">
 
-        async function fazerLogin() {
-            const u = document.getElementById("usuario").value.trim();
-            const s = document.getElementById("senha").value;
-            const t = document.getElementById("tipo").value;
+        <div class="input-group">
+            <label>Tipo</label>
 
-            if (t === "professor" && (!u || !s)) {
-                alert("Por favor, preencha o usuário e a senha do professor!");
-                return;
-            } else if (t === "aluno" && !u) {
-                alert("Por favor, digite o seu CPF!");
-                return;
-            }
+            <select id="tipo" onchange="mudarInterface()">
+                <option value="aluno">Aluno</option>
+                <option value="professor">Professor</option>
+            </select>
+        </div>
 
-            try {
-                const resposta = await fetch("api.php", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ 
-                        acao: "login", 
-                        usuario: u, 
-                        senha: s, 
-                        tipo: t 
-                    })
-                });
+        <div class="input-group">
+            <label id="labelUser">CPF do Aluno</label>
 
-                const dados = await resposta.json();
+            <input
+                type="text"
+                id="usuario"
+                placeholder="Apenas números"
+                maxlength="11">
+        </div>
 
-                if (dados.sucesso) {
-                    // Limpa rastros velhos e grava o objeto limpo do MySQL que veio do api.php
-                    localStorage.clear();
-                    localStorage.setItem("usuarioLogado", JSON.stringify(dados.usuario));
-                    window.location.href = "index.html";
-                } else {
-                    alert(dados.mensagem); 
+        <div class="input-group" id="group-senha">
+            <label>Senha</label>
+
+            <input
+                type="password"
+                id="senha"
+                placeholder="Digite sua senha">
+        </div>
+
+        <button onclick="fazerLogin()" id="btnEntrar">
+            Entrar
+        </button>
+
+        <p id="linkCad" style="text-align:center;margin-top:20px;">
+            Novo?
+            <a href="cadastro.html"
+               style="color:var(--vermelho);font-weight:bold;text-decoration:none;">
+                Cadastre-se
+            </a>
+        </p>
+
+        <p style="text-align:center;margin-top:10px;">
+            <a href="eventos.html"
+               style="color:var(--text-sub);text-decoration:none;font-size:.9rem;">
+                ← Voltar para Eventos
+            </a>
+        </p>
+
+    </div>
+
+</div>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const btn = document.getElementById("darkModeBtn");
+
+    if (btn) {
+        btn.innerText =
+            document.documentElement.getAttribute("data-theme") === "dark"
+            ? "☀️"
+            : "🌙";
+    }
+
+    document
+        .querySelectorAll(".login-form input")
+        .forEach(input => {
+
+            input.addEventListener("keypress", e => {
+
+                if (e.key === "Enter") {
+                    fazerLogin();
                 }
 
-            } catch (erro) {
-                console.error("Erro técnico de requisição:", erro);
-                alert("Erro ao conectar com o backend PHP.");
-            }
-        }
-    </script>
+            });
+
+        });
+
+    mudarInterface();
+
+});
+
+function mudarInterface() {
+
+    const tipo = document.getElementById("tipo").value;
+    const usuario = document.getElementById("usuario");
+
+    document.getElementById("senha").value = "";
+
+    if (tipo === "professor") {
+
+        document.getElementById("labelUser").innerText = "Usuário Professor";
+
+        usuario.placeholder = "Digite o usuário";
+
+        usuario.maxLength = 50;
+
+        document.getElementById("linkCad").style.display = "none";
+
+    } else {
+
+        document.getElementById("labelUser").innerText = "CPF do Aluno";
+
+        usuario.placeholder = "Apenas números";
+
+        usuario.maxLength = 11;
+
+        document.getElementById("linkCad").style.display = "block";
+    }
+
+    usuario.value = "";
+}
+
+async function fazerLogin() {
+
+    const u = document.getElementById("usuario").value.trim();
+    const s = document.getElementById("senha").value;
+    const t = document.getElementById("tipo").value;
+
+    if (t === "professor" && (!u || !s)) {
+        alert("Preencha usuário e senha.");
+        return;
+    }
+
+    if (t === "aluno" && !u) {
+        alert("Digite o CPF.");
+        return;
+    }
+
+    const resposta = await fetch("api.php", {
+        method: "POST",
+        headers: {
+            "Content-Type":"application/json"
+        },
+        body: JSON.stringify({
+            acao:"login",
+            usuario:u,
+            senha:s,
+            tipo:t
+        })
+    });
+
+    const dados = await resposta.json();
+
+    if (dados.sucesso) {
+
+        localStorage.removeItem("usuarioLogado");
+        localStorage.setItem("usuarioLogado", JSON.stringify(dados.usuario));
+
+        window.location.href = "index.html";
+
+    } else {
+
+        alert(dados.mensagem);
+
+    }
+
+}
+window.onload = function () {
+    mudarInterface();
+};
+</script>
+
 </body>
 </html>
