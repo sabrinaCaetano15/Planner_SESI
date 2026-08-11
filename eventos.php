@@ -38,25 +38,25 @@ if($acao=="criar"){
 
     INSERT INTO eventos
 
-    (nome,descricao,local,data_inicio,data_fim,status)
+(nome,descricao,inicio_inscricao,fim_inscricao,local,data_inicio,data_fim,status)
 
-    VALUES
+VALUES
 
-    (?,?,?,?,?,?)
-
+(?,?,?,?,?,?,?,?)
     ");
 
     $sql->execute([
 
-        $dados["nome"],
-        "",
-        $dados["local"],
-        $dados["inicio"],
-        $dados["fim"],
-        "Aberto"
+$dados["nome"],
+$dados["descricao"],
+$dados["inicio_inscricao"],
+$dados["fim_inscricao"],
+$dados["local"],
+$dados["inicio"],
+$dados["fim"],
+"Aberto"
 
-    ]);
-
+]);
     echo json_encode(["sucesso"=>true]);
 
     exit;
@@ -89,34 +89,58 @@ if($acao=="excluir"){
 
 if($acao=="editar"){
 
-    $sql=$pdo->prepare("
+    if(
+        empty($dados["id"]) ||
+        empty($dados["nome"]) ||
+        empty($dados["local"]) ||
+        empty($dados["inicio"]) ||
+        empty($dados["fim"])
+    ){
 
-    UPDATE eventos
+        echo json_encode([
+            "sucesso"=>false,
+            "mensagem"=>"Dados inválidos."
+        ]);
 
-    SET
+        exit;
 
-    nome=?,
+    }
 
-    local=?,
+    $sql = $pdo->prepare("
 
-    data_inicio=?,
+       UPDATE eventos
 
-    data_fim=?
+SET
 
-    WHERE id=?
+nome = ?,
+descricao = ?,
+inicio_inscricao = ?,
+fim_inscricao = ?,
+local = ?,
+data_inicio = ?,
+data_fim = ?
+
+WHERE id = ?
 
     ");
 
     $sql->execute([
 
-        $dados["nome"],
-        $dados["local"],
-        $dados["inicio"],
-        $dados["fim"],
-        $dados["id"]
+$dados["nome"],
+$dados["descricao"],
+$dados["inicio_inscricao"],
+$dados["fim_inscricao"],
+$dados["local"],
+$dados["inicio"],
+$dados["fim"],
+$dados["id"]
 
+]);
+
+    echo json_encode([
+        "sucesso"=>true
     ]);
 
-    echo json_encode(["sucesso"=>true]);
+    exit;
 
 }

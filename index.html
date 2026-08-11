@@ -65,16 +65,20 @@
                 <button onclick="modificarPlacar('B', -1)" style="background: var(--vermelho); color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 700; cursor: pointer;">- Time B</button>
                 <button onclick="resetarPlacar()" style="background: #1e293b; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 700; cursor: pointer;">🔄 Resetar</button>
             </div>
+            <div style="text-align:center; margin:20px 0;">
+                <button id="btnGerenciarModalidades"
+                    onclick="abrirModalModalidades()"
+                    style="display:none;">
+                    ⚙️ Gerenciar Modalidades
+                </button>
+            </div>
         </div>
 
-        <div class="cards">
-            <div class="card active">Vôlei</div><div class="card">Handebol</div>
-            <div class="card">Futsal</div><div class="card">Basquete</div>
-        </div>
-        <div class="sexo-toggle">
-            <button class="sexo-btn active">Masculino</button>
-            <button class="sexo-btn">Feminino</button>
-        </div>
+        <div class="cards" id="listaModalidades"></div>
+
+
+<div id="filtroSexo"></div>
+        
         <div class="form-box" id="formProfessor">
             <input type="text" id="nomeAluno" placeholder="Nome">
             <input type="text" id="turmaAluno" placeholder="Turma">
@@ -94,6 +98,75 @@
         </div>
     </div>
     <!-- Alterado para v=150 para quebrar o cache de script antigo do seu PC de uma vez por todas -->
-    <script src="script.js?v=150"></script>
+    <script src="script.js?v=200"></script>
+
+<div id="modalModalidades" class="modal">
+
+    <div class="modal-conteudo modal-modalidades">
+
+        <div class="modal-header">
+
+            <h2>Gerenciar Modalidades</h2>
+
+            <button
+                class="btn-fechar-modal"
+                onclick="fecharModalModalidades()">
+                ✕
+            </button>
+
+        </div>
+
+        <div class="modal-grid">
+
+            <div class="painel-esquerdo">
+
+                <label>Nome da modalidade</label>
+
+                <input
+                    type="text"
+                    id="novaModalidadeNome"
+                    placeholder="Ex.: Queimada"
+                >
+
+                <label>Sexo</label>
+
+                <select id="novaModalidadeSexo">
+                    <option value="Masculino">Masculino</option>
+                    <option value="Feminino">Feminino</option>
+                    <option value="Misto">Misto</option>
+                </select>
+
+                <label>Máximo de participantes</label>
+
+                <input
+                    type="number"
+                    id="novaModalidadeMax"
+                    value="12"
+                    min="1"
+                >
+
+                <button
+                    class="btn-vermelho"
+                    onclick="adicionarModalidade()">
+
+                    + Adicionar Modalidade
+
+                </button>
+
+            </div>
+
+            <div class="painel-direito">
+
+                <h3>Modalidades cadastradas</h3>
+
+                <div id="listaModalidadesProfessor"></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 </body>
 </html>

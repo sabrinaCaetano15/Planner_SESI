@@ -29,12 +29,65 @@ $dados=json_decode(file_get_contents("php://input"),true);
 $acao=$dados["acao"] ?? "";
 
 /* ==========================
+   LISTAR VIA POST
+========================== */
+
+if($acao=="listar"){
+
+    $sql = $pdo->query("
+        SELECT *
+        FROM atletas
+        ORDER BY nome
+    ");
+
+    echo json_encode([
+        "sucesso" => true,
+        "atletas" => $sql->fetchAll(PDO::FETCH_ASSOC)
+    ]);
+
+    exit;
+
+}
+
+/* ==========================
    INSERIR
 ========================== */
 
 if($acao=="criar"){
 
-    $sql=$pdo->prepare("
+    // Verifica se já existe inscrição
+    $verifica = $pdo->prepare("
+        SELECT id
+        FROM atletas
+        WHERE
+            nome = ?
+            AND modalidade = ?
+            AND sexo = ?
+            AND evento = ?
+    ");
+
+    $verifica->execute([
+
+        $dados["nome"],
+        $dados["modalidade"],
+        $dados["sexo"],
+        $dados["evento"]
+
+    ]);
+
+    if($verifica->rowCount() > 0){
+
+        echo json_encode([
+            "sucesso" => false,
+            "mensagem" => "Este atleta já está inscrito nesta modalidade."
+        ]);
+
+        exit;
+
+    }
+
+    // Cadastra normalmente
+    $sql = $pdo->prepare("
 
         INSERT INTO atletas
         (nome,turma,posicao,modalidade,sexo,evento)
@@ -57,7 +110,7 @@ if($acao=="criar"){
     ]);
 
     echo json_encode([
-        "sucesso"=>true
+        "sucesso" => true
     ]);
 
     exit;

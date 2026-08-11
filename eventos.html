@@ -3,112 +3,51 @@
 <head>
 <meta charset="UTF-8">
 <title>Eventos - Jogos Escolares</title>
+
 <link rel="stylesheet" href="style.css">
 
 <script>
-(function() {
+(function () {
     if (localStorage.getItem("temaEscuro") === "ativo") {
         document.documentElement.setAttribute("data-theme", "dark");
     }
 })();
 
 function toggleDarkMode() {
+
     const html = document.documentElement;
     const btn = document.getElementById("darkModeBtn");
 
     if (html.getAttribute("data-theme") === "dark") {
+
         html.removeAttribute("data-theme");
         localStorage.setItem("temaEscuro", "inativo");
         btn.innerText = "🌙";
+
     } else {
+
         html.setAttribute("data-theme", "dark");
         localStorage.setItem("temaEscuro", "ativo");
         btn.innerText = "☀️";
+
     }
+
 }
 </script>
 
 <style>
-/* =========================
-   EXTRAS VISUAIS DO PAINEL
-========================= */
 
 .btn-excluir-evento{
     background:#1e293b;
-    color:white;
+    color:#fff;
     border:none;
-    padding:10px 14px;
+    padding:10px;
     border-radius:12px;
-    font-weight:800;
     cursor:pointer;
-    transition:0.3s;
     width:100%;
 }
 
 .btn-excluir-evento:hover{
-    background:#0f172a;
-    transform: translateY(-2px);
-}
-
-.event-card{
-    transition:0.3s ease;
-}
-
-.event-card:hover{
-    transform: translateY(-6px);
-}
-
-.event-banner{
-    position:relative;
-    font-size:1.4rem;
-    letter-spacing:0.5px;
-}
-
-.event-body{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-}
-
-.event-info{
-    background:var(--bg-light);
-    padding:8px 12px;
-    border-radius:10px;
-    font-size:0.9rem;
-}
-
-.event-title{
-    font-size:1.3rem;
-    font-weight:900;
-    color:var(--text-main);
-}
-
-/* FORMULÁRIO MAIS MODERNO */
-.form-box input{
-    border-radius:12px;
-    border:2px solid var(--border-color);
-    padding:12px;
-    transition:0.3s;
-}
-
-.form-box input:focus{
-    border-color:var(--vermelho);
-    box-shadow:0 0 0 4px var(--vermelho-light);
-}
-
-.btn-criar-evento{
-    background:var(--vermelho);
-    color:white;
-    border:none;
-    padding:12px;
-    border-radius:12px;
-    font-weight:900;
-    cursor:pointer;
-    transition:0.3s;
-}
-
-.btn-criar-evento:hover{
-    background:var(--vermelho-dark);
     transform:translateY(-2px);
 }
 
@@ -121,299 +60,391 @@ function toggleDarkMode() {
 .actions-evento button{
     flex:1;
 }
+
 </style>
+
 </head>
 
 <body>
 
 <header>
-    🏆 Torneios e Jogos Escolares
-    <button onclick="toggleDarkMode()" class="dark-mode-toggle" id="darkModeBtn">🌙</button>
+
+🏆 Torneios e Jogos Escolares
+
+<button
+onclick="toggleDarkMode()"
+class="dark-mode-toggle"
+id="darkModeBtn">
+🌙
+</button>
+
 </header>
 
 <div class="container">
 
-    <div class="header-actions">
-        <div>Gerencie e participe dos eventos escolares</div>
-    </div>
+<div
+id="painelProfessorEventos"
+class="list"
+style="display:none;margin-bottom:25px;">
 
-    <!-- PAINEL PROFESSOR -->
-    <div id="painelProfessorEventos" class="list" style="display:none;margin-bottom:20px;">
+<h3>⚙️ Gerenciar Eventos</h3>
 
-        <h3 style="margin-bottom:15px;font-weight:900;color:var(--text-main)">
-            ⚙️ Gerenciar Eventos
-        </h3>
+<div class="form-box form-eventos">
 
-        <div class="form-box">
+    <div class="card-form grande">
 
-            <input id="novoEventoNome" placeholder="Nome do evento">
-            <input type="date" id="novoEventoInicio">
-            <input type="date" id="novoEventoFim">
-            <input id="novoEventoLocal" placeholder="Local">
+        <h3>🏆 Informações Gerais</h3>
 
-            <button class="btn-criar-evento" onclick="adicionarEvento()">
-                + Criar Evento
-            </button>
+        <div class="campo">
+
+            <label>Nome do Evento</label>
+
+            <input
+                id="novoEventoNome"
+                placeholder="Ex.: Jogos Escolares SESI">
 
         </div>
+
+        <div class="campo">
+
+            <label>Local</label>
+
+            <input
+                id="novoEventoLocal"
+                placeholder="Ex.: Ginásio Poliesportivo">
+
+        </div>
+
+        <div class="campo">
+
+            <label>Descrição / Avisos</label>
+
+            <textarea
+                id="novaDescricao"
+                rows="5"
+                placeholder="Ex.:&#10;• Comparecer 30 minutos antes;&#10;• Utilizar uniforme completo;&#10;• Levar documento com foto;">
+            </textarea>
+
+        </div>
+
     </div>
 
-    <!-- LISTA -->
-    <div class="events-grid" id="listaEventos"></div>
+    <div class="datas-grid">
+
+        <div class="card-form">
+
+            <h3>📝 Inscrições</h3>
+
+            <div class="campo">
+
+                <label>Início</label>
+
+                <input
+                    type="date"
+                    id="inscricaoInicio">
+
+            </div>
+
+            <div class="campo">
+
+                <label>Encerramento</label>
+
+                <input
+                    type="date"
+                    id="inscricaoFim">
+
+            </div>
+
+        </div>
+
+        <div class="card-form">
+
+            <h3>📅 Evento</h3>
+
+            <div class="campo">
+
+                <label>Início</label>
+
+                <input
+                    type="date"
+                    id="novoEventoInicio">
+
+            </div>
+
+            <div class="campo">
+
+                <label>Encerramento</label>
+
+                <input
+                    type="date"
+                    id="novoEventoFim">
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="acoes-evento-form">
+
+        <button
+            id="btnSalvarEvento"
+            class="btn-criar-evento"
+            onclick="adicionarEvento()">
+
+            + Criar Evento
+
+        </button>
+
+    </div>
+
+</div>
+
+</div>
+
+<div
+class="events-grid"
+id="listaEventos">
+</div>
 
 </div>
 
 <script>
+    const eventoSelecionado = JSON.parse(localStorage.getItem("eventoSelecionado"));
 
-async function obterEventos() {
+if (!eventoSelecionado) {
 
-    const resposta = await fetch("eventos.php");
+    alert("Selecione um evento para continuar.");
 
-    const eventosBanco = await resposta.json();
-
-    return eventosBanco.map(e => ({
-        id: e.id,
-        nome: e.nome,
-        periodo: `${e.data_inicio} até ${e.data_fim}`,
-        local: e.local,
-        cor: "#dc2626",
-        icone: "🏆"
-    }));
+    window.location.href = "eventos.html";
 
 }
+function formatarDataBR(data){
 
-async function renderEventos(){
+    if(!data) return "-";
 
-    const container = document.getElementById("listaEventos");
-    const eventos = await obterEventos();
-    const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
+    const partes = data.split("-");
 
-    container.innerHTML = "";
-
-    eventos.forEach(e => {
-
-        container.innerHTML += `
-        <div class="event-card">
-
-            <div class="event-banner" style="background:${e.cor}">
-                ${e.icone} ${e.nome}
-                <span class="event-badge">ABERTO</span>
-            </div>
-
-            <div class="event-body">
-
-                <div class="event-title">${e.nome}</div>
-
-                <div class="event-info">📅 ${e.periodo}</div>
-                <div class="event-info">📍 ${e.local}</div>
-
-                <button class="btn-inscrever"
-                        style="background:${e.cor}"
-                        onclick="selecionarEvento('${e.nome}')">
-                    Participar
-                </button>
-
-                ${
-                    usuario?.tipo === "professor"
-                    ? `
-                    <div class="actions-evento">
-
-                        <button class="btn-logout"
-                                onclick="editarEvento(${e.id})">
-                            ✏️ Editar
-                        </button>
-
-                        <button class="btn-excluir-evento"
-                                onclick="excluirEvento(${e.id})">
-                            🗑 Excluir
-                        </button>
-
-                    </div>`
-                    : ""
-                }
-
-            </div>
-        </div>`;
-    });
-}
-
-async function obterEventos() {
-
-    const resposta = await fetch("eventos.php");
-
-    const eventosBanco = await resposta.json();
-
-    return eventosBanco.map(e => ({
-        id: e.id,
-        nome: e.nome,
-        periodo: `${e.data_inicio} até ${e.data_fim}`,
-        local: e.local,
-        cor: "#dc2626",
-        icone: "🏆"
-    }));
+    return `${partes[2]}/${partes[1]}/${partes[0]}`;
 
 }
+function calcularStatusInscricao(inicio, fim){
 
-async function renderEventos(){
+    if(!inicio || !fim){
 
-    const container = document.getElementById("listaEventos");
-    const eventos = await obterEventos();
-    const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
+        return {
+            texto: "DATAS NÃO DEFINIDAS",
+            classe: "status-breve",
+            aberto: false
+        };
 
-    container.innerHTML = "";
-
-    eventos.forEach(e => {
-
-        container.innerHTML += `
-        <div class="event-card">
-
-            <div class="event-banner" style="background:${e.cor}">
-                ${e.icone} ${e.nome}
-                <span class="event-badge">ABERTO</span>
-            </div>
-
-            <div class="event-body">
-
-                <div class="event-title">${e.nome}</div>
-
-                <div class="event-info">📅 ${e.periodo}</div>
-                <div class="event-info">📍 ${e.local}</div>
-
-                <button class="btn-inscrever"
-                        style="background:${e.cor}"
-                        onclick="selecionarEvento('${e.nome}')">
-                    Participar
-                </button>
-
-                ${
-                    usuario?.tipo === "professor"
-                    ? `
-                    <div class="actions-evento">
-
-                        <button class="btn-logout"
-                                onclick="editarEvento(${e.id})">
-                            ✏️ Editar
-                        </button>
-
-                        <button class="btn-excluir-evento"
-                                onclick="excluirEvento(${e.id})">
-                            🗑 Excluir
-                        </button>
-
-                    </div>`
-                    : ""
-                }
-
-            </div>
-        </div>`;
-    });
-}
-
-async function obterEventos() {
-
-    const resposta = await fetch("eventos.php");
-    const eventosBanco = await resposta.json();
-
-    return eventosBanco.map(e => ({
-        id: e.id,
-        nome: e.nome,
-        periodo: `${e.data_inicio} até ${e.data_fim}`,
-        local: e.local,
-        cor: "#dc2626",
-        icone: "🏆"
-    }));
-
-}
-
-async function renderEventos(){
-
-    const container = document.getElementById("listaEventos");
-    const eventos = await obterEventos();
-    const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
-
-    container.innerHTML = "";
-
-    eventos.forEach(e => {
-
-        container.innerHTML += `
-        <div class="event-card">
-
-            <div class="event-banner" style="background:${e.cor}">
-                ${e.icone} ${e.nome}
-                <span class="event-badge">ABERTO</span>
-            </div>
-
-            <div class="event-body">
-
-                <div class="event-title">${e.nome}</div>
-
-                <div class="event-info">📅 ${e.periodo}</div>
-                <div class="event-info">📍 ${e.local}</div>
-
-                <button
-                    class="btn-inscrever"
-                    style="background:${e.cor}"
-                    onclick="selecionarEvento(${e.id}, '${e.nome}')">
-                    Participar
-                </button>
-
-                ${
-                    usuario?.tipo === "professor"
-                    ? `
-                    <div class="actions-evento">
-
-                        <button class="btn-logout"
-                                onclick="editarEvento(${e.id})">
-                            ✏️ Editar
-                        </button>
-
-                        <button class="btn-excluir-evento"
-                                onclick="excluirEvento(${e.id})">
-                            🗑 Excluir
-                        </button>
-
-                    </div>`
-                    : ""
-                }
-
-            </div>
-
-        </div>`;
-    });
-
-}
-
-async function adicionarEvento(){
-
-    const nome = document.getElementById("novoEventoNome").value.trim();
-    const inicio = document.getElementById("novoEventoInicio").value;
-    const fim = document.getElementById("novoEventoFim").value;
-    const local = document.getElementById("novoEventoLocal").value.trim();
-
-    if(!nome || !inicio || !fim || !local){
-        alert("Preencha todos os campos.");
-        return;
     }
 
-    const resposta = await fetch("eventos.php",{
+    const hoje = new Date();
+    hoje.setHours(0,0,0,0);
 
-        method:"POST",
+    const inicioInscricao = new Date(inicio + "T00:00:00");
+    const fimInscricao = new Date(fim + "T23:59:59");
 
-        headers:{
-            "Content-Type":"application/json"
+    if(hoje < inicioInscricao){
+
+        return {
+            texto: "INSCRIÇÕES EM BREVE",
+            classe: "status-breve",
+            aberto: false
+        };
+
+    }
+
+    if(hoje > fimInscricao){
+
+        return {
+            texto: "INSCRIÇÕES ENCERRADAS",
+            classe: "status-encerrado",
+            aberto: false
+        };
+
+    }
+
+    return {
+        texto: "INSCRIÇÕES ABERTAS",
+        classe: "status-aberto",
+        aberto: true
+    };
+
+}
+async function obterEventos(){
+
+    const resposta = await fetch("eventos.php");
+
+    const dados = await resposta.json();
+
+    console.log(dados);
+
+    return dados.map(e => ({
+
+        id: e.id,
+
+        nome: e.nome,
+
+        descricao: e.descricao,
+
+        local: e.local,
+
+        inicio_inscricao: e.inicio_inscricao,
+
+        fim_inscricao: e.fim_inscricao,
+
+        data_inicio: e.data_inicio,
+
+        data_fim: e.data_fim,
+
+        periodoInscricao:
+            `${formatarDataBR(e.inicio_inscricao)} até ${formatarDataBR(e.fim_inscricao)}`,
+
+        periodoEvento:
+            `${formatarDataBR(e.data_inicio)} até ${formatarDataBR(e.data_fim)}`,
+
+        cor:"#dc2626",
+
+        icone:"🏆"
+
+    }));
+
+}
+
+async function renderEventos(){
+
+    const container = document.getElementById("listaEventos");
+
+    const eventos = await obterEventos();
+
+    const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
+
+    container.innerHTML = "";
+
+    eventos.forEach(e => {
+        
+        console.log(e);
+
+        const status = calcularStatusInscricao(
+        e.inicio_inscricao,
+        e.fim_inscricao
+    );
+
+    console.log("Status inscrição:", status);
+
+        container.innerHTML += `
+
+<div class="event-card">
+
+    <div class="event-banner" style="background:${e.cor}">
+        ${e.icone} ${e.nome}
+        <span class="event-badge ${status.classe}">
+            ${status.texto}
+        </span>
+    </div>
+
+    <div class="event-body">
+
+        <div class="event-title">${e.nome}</div>
+
+        <div class="event-info">
+📝 <strong>Inscrições</strong><br>
+${e.periodoInscricao}
+</div>
+
+<div class="event-info">
+🏆 <strong>Período do Evento</strong><br>
+${e.periodoEvento}
+</div>
+
+        <div class="event-info">
+            📍 ${e.local}
+        </div>
+
+        ${e.descricao ? `
+
+<div class="event-info">
+    📝 ${e.descricao}
+</div>
+
+` : ""}
+
+        <button
+    class="btn-inscrever"
+    style="background:${status.aberto ? e.cor : "#9ca3af"}"
+    ${status.aberto ? `onclick="selecionarEvento(${e.id},'${e.nome}')"` : "disabled"}>
+
+    ${
+        status.aberto
+            ? "Participar"
+            : status.texto
+    }
+
+</button>
+
+        ${usuario?.tipo==="professor" ? `
+
+        <div class="actions-evento">
+
+            <button
+                class="btn-logout"
+                onclick="editarEvento(${e.id})">
+
+                ✏️ Editar
+
+            </button>
+
+            <button
+                class="btn-excluir-evento"
+                onclick="excluirEvento(${e.id})">
+
+                🗑 Excluir
+
+            </button>
+
+        </div>
+
+        ` : ""}
+
+    </div>
+
+</div>
+
+`;
+
+    });
+
+}
+
+async function selecionarEvento(id, nome) {
+
+    const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
+
+    if (!usuario) {
+
+        alert("Faça login para participar do evento.");
+        window.location.href = "login.html";
+        return;
+
+    }
+
+    const resposta = await fetch("api.php", {
+
+        method: "POST",
+
+        headers: {
+            "Content-Type": "application/json"
         },
 
-        body:JSON.stringify({
+        body: JSON.stringify({
 
-            acao:"criar",
+            acao: "inscreverEvento",
 
-            nome:nome,
+            id_usuario: usuario.id,
 
-            local:local,
-
-            inicio:inicio,
-
-            fim:fim
+            id_evento: id
 
         })
 
@@ -421,92 +452,60 @@ async function adicionarEvento(){
 
     const retorno = await resposta.json();
 
-    if(retorno.sucesso){
+    if (!retorno.sucesso) {
 
-        alert("Evento criado com sucesso!");
-
-        document.getElementById("novoEventoNome").value="";
-        document.getElementById("novoEventoInicio").value="";
-        document.getElementById("novoEventoFim").value="";
-        document.getElementById("novoEventoLocal").value="";
-
-        renderEventos();
-
-    }else{
-
-        alert("Erro ao criar evento.");
+        alert(retorno.mensagem);
+        return;
 
     }
 
-}
+    localStorage.setItem("eventoSelecionado", JSON.stringify({
+        id: id,
+        nome: nome
+    }));
 
+    window.location.href = "index.html";
+
+}
 async function editarEvento(id){
 
     const eventos = await obterEventos();
 
-    const e = eventos.find(x => x.id == id);
+    const evento = eventos.find(e => e.id == id);
 
-    if(!e) return;
+    if(!evento) return;
 
-    const nome = prompt("Nome do evento:", e.nome);
-    if(nome === null) return;
+    eventoEditando = id;
 
-    const local = prompt("Local:", e.local);
-    if(local === null) return;
+    document.getElementById("novoEventoNome").value = evento.nome;
+    document.getElementById("novoEventoInicio").value = evento.data_inicio;
+    document.getElementById("novoEventoFim").value = evento.data_fim;
+    document.getElementById("novoEventoLocal").value = evento.local;
+    document.getElementById("novaDescricao").value = evento.descricao || "";
+    document.getElementById("inscricaoInicio").value = evento.inicio_inscricao;
+    document.getElementById("inscricaoFim").value = evento.fim_inscricao;
+    const botao = document.querySelector(".btn-criar-evento");
 
-    const inicio = prompt("Data inicial (AAAA-MM-DD):", e.periodo.split(" até ")[0]);
-    if(inicio === null) return;
+    botao.innerText = "💾 Salvar Alterações";
+}
+function limparFormularioEvento(){
 
-    const fim = prompt("Data final (AAAA-MM-DD):", e.periodo.split(" até ")[1]);
-    if(fim === null) return;
+    eventoEditando = null;
 
-    const resposta = await fetch("eventos.php",{
+    document.getElementById("novoEventoNome").value = "";
+    document.getElementById("novoEventoLocal").value = "";
+    document.getElementById("novaDescricao").value = "";
+    document.getElementById("inscricaoInicio").value = "";
+    document.getElementById("inscricaoFim").value = "";
+    document.getElementById("novoEventoInicio").value = "";
+    document.getElementById("novoEventoFim").value = "";
 
-        method:"POST",
-
-        headers:{
-            "Content-Type":"application/json"
-        },
-
-        body:JSON.stringify({
-
-            acao:"editar",
-
-            id:id,
-
-            nome:nome,
-
-            local:local,
-
-            inicio:inicio,
-
-            fim:fim
-
-        })
-
-    });
-
-    const retorno = await resposta.json();
-
-    if(retorno.sucesso){
-
-        alert("Evento atualizado!");
-
-        renderEventos();
-
-    }else{
-
-        alert("Erro ao atualizar.");
-
-    }
+    document.querySelector(".btn-criar-evento").innerText = "+ Criar Evento";
 
 }
-
 async function excluirEvento(id){
 
-    if(!confirm("Deseja realmente excluir este evento?")){
-        return;
-    }
+    if(!confirm("Excluir evento?")) return;
 
     const resposta = await fetch("eventos.php",{
 
@@ -516,11 +515,11 @@ async function excluirEvento(id){
             "Content-Type":"application/json"
         },
 
-        body:JSON.stringify({
+        body: JSON.stringify({
 
-            acao:"excluir",
+            acao: "excluir",
 
-            id:id
+            id: id
 
         })
 
@@ -530,41 +529,30 @@ async function excluirEvento(id){
 
     if(retorno.sucesso){
 
-        alert("Evento excluído!");
-
         renderEventos();
 
     }else{
 
-        alert("Erro ao excluir.");
+        alert("Erro ao excluir evento.");
 
     }
 
 }
 
-function selecionarEvento(id, nome){
+document.addEventListener("DOMContentLoaded",()=>{
 
-    localStorage.setItem("eventoSelecionado", JSON.stringify({
-        id:id,
-        nome:nome
-    }));
-
-    window.location.href = "login.html";
-
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-
-    const painel = document.getElementById("painelProfessorEventos");
     const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
 
-    if(painel && usuario?.tipo === "professor"){
-        painel.style.display = "block";
+    if(usuario?.tipo === "professor"){
+
+        document.getElementById("painelProfessorEventos").style.display = "block";
+
     }
 
     renderEventos();
 
 });
+
 </script>
 
 </body>

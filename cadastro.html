@@ -1,88 +1,251 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <title>Cadastro - Jogos Escolares</title>
-    <link rel="stylesheet" href="style.css">
-    <script>
-        (function() {
-            if (localStorage.getItem("temaEscuro") === "ativo") {
-                document.documentElement.setAttribute("data-theme", "dark");
-            }
-        })();
-        document.addEventListener("DOMContentLoaded", () => {
-            const btn = document.getElementById("darkModeBtn");
-            if (btn) btn.innerText = document.documentElement.getAttribute("data-theme") === "dark" ? "☀️" : "🌙";
-        });
-        function toggleDarkMode() {
-            const html = document.documentElement;
-            const btn = document.getElementById("darkModeBtn");
-            if (html.getAttribute("data-theme") === "dark") {
-                html.removeAttribute("data-theme");
-                localStorage.setItem("temaEscuro", "inativo");
-                if (btn) btn.innerText = "🌙";
-            } else {
-                html.setAttribute("data-theme", "dark");
-                localStorage.setItem("temaEscuro", "ativo");
-                if (btn) btn.innerText = "☀️";
-            }
-        }
-    </script>
+
+<meta charset="UTF-8">
+<title>Cadastro - Jogos Escolares</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script>
+
+(function(){
+
+    if(localStorage.getItem("temaEscuro")=="ativo"){
+        document.documentElement.setAttribute("data-theme","dark");
+    }
+
+})();
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+    const btn=document.getElementById("darkModeBtn");
+
+    if(btn){
+
+        btn.innerText=
+        document.documentElement.getAttribute("data-theme")=="dark"
+        ? "☀️"
+        : "🌙";
+
+    }
+
+});
+
+function toggleDarkMode(){
+
+    const html=document.documentElement;
+    const btn=document.getElementById("darkModeBtn");
+
+    if(html.getAttribute("data-theme")=="dark"){
+
+        html.removeAttribute("data-theme");
+        localStorage.setItem("temaEscuro","inativo");
+
+        btn.innerText="🌙";
+
+    }else{
+
+        html.setAttribute("data-theme","dark");
+        localStorage.setItem("temaEscuro","ativo");
+
+        btn.innerText="☀️";
+
+    }
+
+}
+
+</script>
+
 </head>
+
 <body class="login-page">
-    <button onclick="toggleDarkMode()" class="dark-mode-toggle" id="darkModeBtn" style="top:25px; transform:none;">🌙</button>
-    <div class="login-box">
-        <div class="login-accent-bar"></div>
-        <div class="login-header"><div class="icon-circle">📝</div><h2>Criar Conta</h2></div>
-        <div class="login-form">
-            <div class="input-group"><label>Nome Completo</label><input type="text" id="cadNome"></div>
-            <div class="input-group"><label>CPF (Apenas números)</label><input type="text" id="cadCPF" maxlength="11"></div>
-            <div class="input-group"><label>Data de Nascimento</label><input type="date" id="cadNasc"></div>
-            <div class="input-group"><label>Crie uma Senha</label><input type="password" id="cadSenha"></div>
-            <button onclick="registrar()" id="btnEntrar">Finalizar Cadastro</button>
-            <p style="text-align:center; margin-top:20px;"><a href="login.html" style="color:var(--vermelho); font-weight:bold; text-decoration:none;">Fazer Login</a></p>
-        </div>
-    </div>
-    <script>
-        async function registrar() {
-            const nome = document.getElementById("cadNome").value.trim();
-            const cpf = document.getElementById("cadCPF").value.replace(/\D/g,'');
-            const data = document.getElementById("cadNasc").value;
-            const senha = document.getElementById("cadSenha").value;
 
-            if(!nome || cpf.length < 11 || !data || !senha) {
-                return alert("Por favor, preencha todos os campos corretamente!");
-            }
+<button
+onclick="toggleDarkMode()"
+class="dark-mode-toggle"
+id="darkModeBtn"
+style="top:25px;transform:none;">
 
-            try {
-                // Envia os dados estruturados rumo ao endpoint do api.php
-                const resposta = await fetch("api.php", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        acao: "cadastrar_aluno",
-                        nome: nome,
-                        cpf: cpf,
-                        senha: senha
-                    })
-                });
+🌙
 
-                const dados = await resposta.json();
+</button>
 
-                if (dados.sucesso) {
-                    alert("Cadastro realizado com sucesso via MySQL!");
-                    window.location.href = "login.html";
-                } else {
-                    alert(dados.mensagem);
-                }
+<div class="login-box">
 
-            } catch (erro) {
-                console.error("Erro técnico no envio do cadastro:", erro);
-                alert("Erro ao conectar com o servidor local.");
-            }
-        }
-    </script>
+<div class="login-accent-bar"></div>
+
+<div class="login-header">
+
+<div class="icon-circle">📝</div>
+
+<h2>Criar Conta</h2>
+
+</div>
+
+<div class="login-form">
+
+<div class="input-group">
+
+<label>Nome Completo</label>
+
+<input
+type="text"
+id="cadNome">
+
+</div>
+
+<div class="input-group">
+
+<label>CPF</label>
+
+<input
+type="text"
+id="cadCPF"
+maxlength="11">
+
+</div>
+
+<div class="input-group">
+
+<label>RG</label>
+
+<input
+type="text"
+id="cadRG">
+
+</div>
+
+<div class="input-group">
+
+<label>Data de nascimento</label>
+
+<input
+type="date"
+id="cadNasc">
+
+</div>
+
+<div class="input-group">
+
+<label>Sexo</label>
+
+<select id="cadSexo">
+
+<option>Masculino</option>
+
+<option>Feminino</option>
+
+</select>
+
+</div>
+
+<div class="input-group">
+
+<label>Crie uma senha</label>
+
+<input
+type="password"
+id="cadSenha">
+
+</div>
+
+<button onclick="registrar()" id="btnEntrar">
+    Finalizar Cadastro
+</button>
+
+<p style="text-align:center;margin-top:20px;">
+
+<a
+href="login.html"
+style="color:var(--vermelho);font-weight:bold;text-decoration:none;">
+
+Fazer Login
+
+</a>
+
+</p>
+
+</div>
+
+</div>
+
+<script>
+
+async function registrar(){
+
+    const nome=document.getElementById("cadNome").value.trim();
+
+    const cpf=document.getElementById("cadCPF").value.trim();
+
+    const rg=document.getElementById("cadRG").value.trim();
+
+    const nascimento=document.getElementById("cadNasc").value;
+
+    const sexo=document.getElementById("cadSexo").value;
+
+    const senha=document.getElementById("cadSenha").value;
+
+    if(
+        !nome||
+        !cpf||
+        !rg||
+        !nascimento||
+        !sexo||
+        !senha
+    ){
+
+        alert("Preencha todos os campos.");
+
+        return;
+
+    }
+
+    const resposta=await fetch("api.php",{
+
+        method:"POST",
+
+        headers:{
+            "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+
+            acao:"cadastrar_aluno",
+
+            nome:nome,
+
+            cpf:cpf,
+
+            rg:rg,
+
+            data_nascimento:nascimento,
+
+            sexo:sexo,
+
+            senha:senha
+
+        })
+
+    });
+
+    const retorno=await resposta.json();
+
+    if(retorno.sucesso){
+
+        alert("Cadastro realizado!");
+
+        window.location="login.html";
+
+    }else{
+
+        alert(retorno.mensagem);
+
+    }
+
+}
+
+</script>
+
 </body>
 </html>

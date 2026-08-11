@@ -38,7 +38,7 @@ async function login() {
             localStorage.setItem("usuarioLogado", JSON.stringify(dados.usuario));
             
             // Direciona o usuário para o Dashboard estabilizado
-            window.location.href = "index.html";
+            window.location.href = "eventos.html";
         } else {
             // Se o aluno não existir ou a senha do prof estiver errada, exibe o aviso do PHP
             alert(dados.mensagem); 

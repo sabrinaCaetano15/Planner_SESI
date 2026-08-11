@@ -1,88 +1,272 @@
 <?php
+
 session_start();
-require_once 'conexao.php';
+require_once "conexao.php";
 
-header('Content-Type: application/json');
+header("Content-Type: application/json");
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $input = json_decode(file_get_contents('php://input'), true);
-    $acao = $input['acao'] ?? '';
+$input = json_decode(file_get_contents("php://input"), true);
 
-    // ==========================================
-    // ROTA: LOGIN VIA BACKEND
-    // ==========================================
-    if ($acao === 'login') {
+$acao = $input["acao"] ?? "";
 
-    $usuario = trim($input['usuario'] ?? '');
-    $senha = $input['senha'] ?? '';
-    $tipo = $input['tipo'] ?? '';
+
+
+/* ==========================================================
+   LOGIN
+========================================================== */
+
+if ($acao == "login") {
+
+    $usuario = trim($input["usuario"] ?? "");
+    $senha = $input["senha"] ?? "";
+    $tipo = $input["tipo"] ?? "";
 
     try {
 
-        if ($tipo === "aluno") {
+        if ($tipo == "aluno") {
 
-            // Aluno faz login pelo CPF
             $cpf = preg_replace('/\D/', '', $usuario);
 
-            $sql = "SELECT id, nome, cpf, senha, tipo
+            $sql = "SELECT *
                     FROM usuarios
-                    WHERE cpf = :usuario
-                    AND tipo = 'aluno'
+                    WHERE cpf = ?
                     LIMIT 1";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$cpf]);
 
         } else {
 
-            // Professor (e futuramente admin) faz login pelo nome
-            $sql = "SELECT id, nome, cpf, senha, tipo
+            $sql = "SELECT *
                     FROM usuarios
-                    WHERE nome = :usuario
-                    AND tipo = :tipo
+                    WHERE nome = ?
+                    AND tipo = ?
                     LIMIT 1";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$usuario,$tipo]);
+
         }
 
-        $stmt = $pdo->prepare($sql);
+        $usuarioBanco = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($tipo === "aluno") {
-            $stmt->bindValue(":usuario", $cpf);
-        } else {
-            $stmt->bindValue(":usuario", $usuario);
-            $stmt->bindValue(":tipo", $tipo);
-        }
-
-        $stmt->execute();
-
-        $dados = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if (!$dados) {
+        if(!$usuarioBanco){
 
             echo json_encode([
-                "sucesso" => false,
-                "mensagem" => "Usuário não encontrado."
+                "sucesso"=>false,
+                "mensagem"=>"Usuário não encontrado."
             ]);
 
             exit;
+
         }
 
-        if (!password_verify($senha, $dados["senha"])) {
+        if(!password_verify($senha,$usuarioBanco["senha"])){
 
             echo json_encode([
-                "sucesso" => false,
-                "mensagem" => "Senha incorreta."
+                "sucesso"=>false,
+                "mensagem"=>"Senha incorreta."
             ]);
 
             exit;
+
         }
 
-        $_SESSION["usuario"] = $dados["id"];
+        $_SESSION["usuario"]=$usuarioBanco["id"];
+
+        echo json_encode([
+            "sucesso"=>true,
+            "usuario"=>$usuarioBanco
+        ]);
+
+    } catch(PDOException $e){
+
+        echo json_encode([
+            "sucesso"=>false,
+            "mensagem"=>$e->getMessage()
+        ]);
+
+    }
+
+    exit;
+}
+
+/* ==========================================================
+   INSCREVER EM EVENTO
+========================================================== */
+
+if ($acao == "inscreverEvento") {
+
+    $idUsuario = $input["id_usuario"] ?? 0;
+    $idEvento  = $input["id_evento"] ?? 0;
+
+    if (!$idUsuario || !$idEvento) {
+
+        echo json_encode([
+            "sucesso" => false,
+            "mensagem" => "Dados inválidos."
+        ]);
+
+        exit;
+    }
+
+    // Verifica se já está inscrito
+    $sql = $pdo->prepare("
+        SELECT id
+        FROM inscricoes
+        WHERE id_usuario = ?
+        AND id_evento = ?
+    ");
+
+    $sql->execute([$idUsuario, $idEvento]);
+
+    if ($sql->fetch()) {
+
+        echo json_encode([
+            "sucesso" => false,
+            "mensagem" => "Você já está inscrito neste evento."
+        ]);
+
+        exit;
+    }
+
+    // Cria inscrição
+    $sql = $pdo->prepare("
+        INSERT INTO inscricoes
+        (id_usuario,id_evento)
+        VALUES (?,?)
+    ");
+
+    $sql->execute([
+        $idUsuario,
+        $idEvento
+    ]);
+
+    echo json_encode([
+        "sucesso" => true
+    ]);
+
+    exit;
+
+}
+
+/* ==========================================================
+   CADASTRAR ALUNO
+========================================================== */
+
+if ($acao == "cadastrar_aluno") {
+
+    $nome = trim($input["nome"] ?? "");
+    $cpf = preg_replace('/\D/', '', $input["cpf"] ?? "");
+    $rg = trim($input["rg"] ?? "");
+    $nascimento = $input["data_nascimento"] ?? "";
+    $sexo = $input["sexo"] ?? "";
+    $senha = $input["senha"] ?? "";
+
+    $senhaHash = password_hash($senha,PASSWORD_DEFAULT);
+
+    try{
+
+        $sql="INSERT INTO usuarios
+        (nome,cpf,rg,data_nascimento,sexo,senha,tipo)
+
+        VALUES
+
+        (?,?,?,?,?,?,'aluno')";
+
+        $stmt=$pdo->prepare($sql);
+
+        $stmt->execute([
+
+            $nome,
+            $cpf,
+            $rg,
+            $nascimento,
+            $sexo,
+            $senhaHash
+
+        ]);
+
+        echo json_encode([
+            "sucesso"=>true
+        ]);
+
+    }catch(PDOException $e){
+
+        echo json_encode([
+            "sucesso"=>false,
+            "mensagem"=>$e->getMessage()
+        ]);
+
+    }
+
+    exit;
+
+}
+
+/* ==========================================================
+   LISTAR MODALIDADES DO EVENTO
+========================================================== */
+
+if ($acao == "listar_modalidades") {
+
+    $idEvento = $input["id_evento"] ?? 0;
+
+    try {
+
+        $sql = $pdo->prepare("
+            SELECT *
+            FROM modalidades
+            WHERE id_evento = ?
+            ORDER BY nome, sexo
+        ");
+
+        $sql->execute([$idEvento]);
 
         echo json_encode([
             "sucesso" => true,
-            "usuario" => [
-                "id" => $dados["id"],
-                "nome" => $dados["nome"],
-                "cpf" => $dados["cpf"],
-                "tipo" => $dados["tipo"]
-            ]
+            "modalidades" => $sql->fetchAll(PDO::FETCH_ASSOC)
+        ]);
+
+    } catch(PDOException $e){
+
+        echo json_encode([
+            "sucesso" => false,
+            "mensagem" => $e->getMessage()
+        ]);
+
+    }
+
+    exit;
+}
+
+/* ==========================================================
+   SALVAR MODALIDADES
+========================================================== */
+
+if ($acao == "salvar_modalidades") {
+
+    $modalidades = $input["modalidades"] ?? [];
+
+    try {
+
+        $sql = $pdo->prepare("
+            UPDATE modalidades
+            SET ativa = ?
+            WHERE id = ?
+        ");
+
+        foreach ($modalidades as $modalidade) {
+
+            $sql->execute([
+                $modalidade["ativa"],
+                $modalidade["id"]
+            ]);
+
+        }
+
+        echo json_encode([
+            "sucesso" => true
         ]);
 
     } catch (PDOException $e) {
@@ -91,51 +275,111 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             "sucesso" => false,
             "mensagem" => $e->getMessage()
         ]);
+
     }
 
     exit;
 }
-    // ==========================================
-    // ROTA: REGISTRAR CONTA DE ALUNO
-    // ==========================================
-    if ($acao === 'cadastrar_aluno') {
-        $nome = $input['nome'] ?? '';
-        $cpfRaw = $input['cpf'] ?? '';
-        $senhaPura = $input['senha'] ?? '';
+/* ==========================================================
+   ADICIONAR MODALIDADE
+========================================================== */
 
-        // Limpa a string do CPF mantendo apenas dígitos antes de salvar no banco
-        $cpfLimpo = preg_replace('/\D/', '', $cpfRaw);
+if ($acao == "adicionar_modalidade") {
 
-        // Gera o hash seguro com BCrypt para a senha do aluno
-        $senhaHash = password_hash($senhaPura, PASSWORD_BCRYPT);
+    $nome = trim($input["nome"] ?? "");
+    $sexo = trim($input["sexo"] ?? "");
+    $maximo = intval($input["maximo"] ?? 12);
+    $idEvento = intval($input["id_evento"] ?? 0);
 
-        try {
-            $sql = "INSERT INTO usuarios (nome, cpf, tipo, senha) VALUES (:nome, :cpf, 'aluno', :senha)";
-            $stmt = $pdo->prepare($sql);
-            $stmt->bindParam(':nome', $nome);
-            $stmt->bindParam(':cpf', $cpfLimpo);
-            $stmt->bindParam(':senha', $senhaHash);
-            $stmt->execute();
+    if ($nome == "") {
 
-            echo json_encode(['sucesso' => true]);
-        } catch (PDOException $e) {
-            if ($e->getCode() == 23000) {
-                echo json_encode(['sucesso' => false, 'mensagem' => 'Este CPF já está cadastrado no sistema!']);
-            } else {
-                echo json_encode(['sucesso' => false, 'mensagem' => 'Erro ao salvar no banco: ' . $e->getMessage()]);
-            }
-        }
+        echo json_encode([
+            "sucesso" => false,
+            "mensagem" => "Informe o nome da modalidade."
+        ]);
+
         exit;
     }
-}
 
-// Se receber requisições do tipo GET, lista os usuários cadastrados
-try {
-    $sql = "SELECT nome, tipo, cpf FROM usuarios";
-    $stmt = $pdo->query($sql);
-    $atletas = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    echo json_encode($atletas);
-} catch (PDOException $e) {
+    try {
+
+        $sql = $pdo->prepare("
+            INSERT INTO modalidades
+            (id_evento, nome, sexo, max_participantes, ativa)
+
+            VALUES (?, ?, ?, ?, 1)
+        ");
+
+        $sql->execute([
+            $idEvento,
+            $nome,
+            $sexo,
+            $maximo
+        ]);
+
+        echo json_encode([
+            "sucesso" => true
+        ]);
+
+    } catch(PDOException $e){
+
+        echo json_encode([
+            "sucesso"=>false,
+            "mensagem"=>$e->getMessage()
+        ]);
+
+    }
+
+    exit;
+}
+/* ==========================================================
+   EXCLUIR MODALIDADE
+========================================================== */
+
+if ($acao == "excluir_modalidade") {
+
+    $id = $input["id"] ?? 0;
+
+    try {
+
+        $sql = $pdo->prepare("
+            DELETE FROM modalidades
+            WHERE id = ?
+        ");
+
+        $sql->execute([$id]);
+
+        echo json_encode([
+            "sucesso" => true
+        ]);
+
+    } catch (PDOException $e) {
+
+        echo json_encode([
+            "sucesso" => false,
+            "mensagem" => $e->getMessage()
+        ]);
+
+    }
+
+    exit;
+
+}
+/* ==========================================================
+   LISTAR USUÁRIOS
+========================================================== */
+
+try{
+
+    $usuarios=$pdo
+        ->query("SELECT * FROM usuarios")
+        ->fetchAll(PDO::FETCH_ASSOC);
+
+    echo json_encode($usuarios);
+
+}catch(PDOException $e){
+
     echo json_encode([]);
+
 }
 ?>
